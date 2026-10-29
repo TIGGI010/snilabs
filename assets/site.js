@@ -286,6 +286,15 @@
   };
   const linkTo = (key, obj, anchor) => location.href.split('#')[0] + '#' + key + '=' + encodeURIComponent(JSON.stringify(obj));
 
+  /* ---------- map: loads Google's embed only when asked ---------- */
+  $$('[data-loadmap]').forEach(btn => btn.addEventListener('click', () => {
+    const box = btn.closest('.mapbox');
+    const f = document.createElement('iframe');
+    f.src = box.dataset.embed; f.title = 'Map: 30 Brunel Road, Thulisa Park'; f.loading = 'lazy';
+    f.referrerPolicy = 'no-referrer-when-downgrade'; f.allowFullscreen = true;
+    box.classList.add('live'); box.appendChild(f);
+  }));
+
   /* ---------- the send form: fills itself from an estimate or app plan ---------- */
   const sendDlg = $('#sendform');
   const openSend = (text, title) => {
