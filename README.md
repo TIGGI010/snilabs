@@ -35,9 +35,11 @@ Search the HTML for `data-todo`:
 
 ## Prices
 
-The estimator reads its numbers from the HTML in `pricing.html`: `data-lo`, `data-hi` and
-`data-inc` on each build option, `data-add` on each add-on, and the care plan values. Extra pages
-(R450 each) and products (R250 per 10) are set at the top of the estimator in `assets/site.js`.
+The estimator's build types, add-ons and website ideas are listed in `site-src/planner.py` in the build
+sources, and rendered into `pricing.html` as `data-lo`, `data-hi` and `data-add` attributes. The sliders for
+each build type (what they count, how many are included and the price of each extra) are the `SIZE` table at
+the top of the estimator in `assets/site.js`. The app planner on `apps.html` works the same way: platforms,
+app types and features carry their prices in the HTML, and the screen price is set in `assets/site.js`.
 
 ## Deploy
 
