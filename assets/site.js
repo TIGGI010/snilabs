@@ -444,7 +444,7 @@
       outDep.textContent = payPlan(q.lo);
       outTime.textContent = weeksText(q.weeks);
       outMonthly.textContent = (q.care || q.run) ? fmt(q.care + q.run) + ' / month' : 'None';
-      if (monthK) monthK.textContent = q.run ? 'Running costs a month, incl. ' + fmt(q.run) + ' chatbot' : 'Running costs a month (care plan)';
+      if (monthK) monthK.textContent = q.run ? 'A month, incl. ' + fmt(q.run) + ' chatbot' : 'Care plan a month';
       if (careNote) careNote.textContent = q.careNote || '';
       fillLines(outLines, q.lines);
       wa.href = WA + '?text=' + encodeURIComponent(brief(q));
@@ -587,6 +587,8 @@
       briefBox.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); applyBrief(true); } });
       briefBox.addEventListener('input', () => render());
     }
+    /* "What each add-on includes" opens its drop-down */
+    $$('a[href="#features"]').forEach(a => a.addEventListener('click', () => { const d = $('#features details'); if (d) d.open = true; }));
     /* ideas: one tap sets the build, the sliders and the add-ons */
     $$('.idea', $('#e-ideas')).forEach(btn => btn.addEventListener('click', () => {
       let idea;
@@ -603,7 +605,9 @@
     try { incoming = sessionStorage.getItem('startline-brief') || ''; sessionStorage.removeItem('startline-brief'); } catch (e) {}
     if (!incoming) { try { incoming = new URLSearchParams(location.search).get('brief') || ''; } catch (e) {} }
     if (shared) {
-      apply(shared);
+      if (shared.say && briefBox) briefBox.value = shared.say;
+      apply(Object.assign({ c: 0 }, shared));
+      if (shared.say) showFound(summary(), shared.say);
       setTimeout(() => $('#estimate').scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
     } else if (incoming && briefBox) {
       briefBox.value = incoming;
@@ -702,8 +706,24 @@
       const target = window.innerWidth < 920 ? $('#appq .est-out') : appq;
       target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     }));
+    /* the device stage and the "runs on" row follow the chosen platform */
+    const syncDevices = () => {
+      const on = ((pick('plat') || {}).dataset || {}).runs || '';
+      $$('[data-dev]').forEach(d => d.classList.toggle('on', on.split(' ').includes(d.dataset.dev)));
+    };
+    appq.addEventListener('change', syncDevices);
+    $$('.stage-dev').forEach(b => b.addEventListener('click', () => {
+      const r = $('input[name="plat"][value="' + b.dataset.plat + '"]', appq);
+      if (r) { r.checked = true; render(); syncDevices(); }
+      $('#plan').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    }));
     const shared = readHash('app');
-    if (shared) apply(shared); else render();
+    if (shared) {
+      if (shared.say && !idea.value) idea.value = shared.say;
+      apply(shared);
+      setTimeout(() => $('#plan').scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
+    } else render();
+    syncDevices();
   }
 
   /* ---------- phones: a floating price bar while the form is long ---------- */
