@@ -860,3 +860,19 @@ html.splash .splash-screen .spd{animation:sl-spd 1.5s ease-out .15s both}
 .proj-top{display:flex;align-items:center;gap:18px;margin-bottom:28px}
 .proj-icon svg{width:88px;height:88px;border-radius:20px;display:block}
 .status.conf i{background:var(--ink-3);box-shadow:none;animation:none}
+
+.stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:980px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats .stat:first-child{grid-column:1/-1}}
+.tier-run{margin-top:6px;font-size:12.5px;color:var(--ink-3)}
+.also{grid-template-columns:repeat(4,minmax(0,1fr))}
+/* ---------- send form ---------- */
+.sendform{width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--line);border-radius:26px;background:var(--card);color:var(--ink);box-shadow:0 40px 80px -20px rgba(0,0,0,.45)}
+.sendform::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(4px)}
+.sf-in{display:flex;flex-direction:column;gap:16px;padding:clamp(20px,3vw,30px)}
+.sf-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sf-head h2{font-size:clamp(24px,3vw,30px);font-weight:800;letter-spacing:-.04em}
+.sf-lead{font-size:14.5px;color:var(--ink-2)}
+.sf-in .form{margin-top:0}
+.sf-in textarea{font-size:13.5px;line-height:1.5}
+.sf-actions .btn{flex:1 1 200px}
+.stat b{font-size:clamp(38px,3.8vw,60px)}

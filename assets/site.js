@@ -9,6 +9,7 @@
   const canHover = mq('(hover: hover)').matches;
   const PHONE = '065 769 1052';
   const WA = 'https://wa.me/27657691052';
+  const EMAIL = 'hello@startlinelab.com';
 
   /* ---------- splash: once a session, then out of the way ---------- */
   if (root.classList.contains('splash')) {
@@ -285,6 +286,26 @@
   };
   const linkTo = (key, obj, anchor) => location.href.split('#')[0] + '#' + key + '=' + encodeURIComponent(JSON.stringify(obj));
 
+  /* ---------- the send form: fills itself from an estimate or app plan ---------- */
+  const sendDlg = $('#sendform');
+  const openSend = (text, title) => {
+    if (!sendDlg) { location.href = WA + '?text=' + encodeURIComponent(text); return; }
+    const msg = $('#sf-msg'), name = $('#sf-name'), biz = $('#sf-biz'), phone = $('#sf-phone'), email = $('#sf-email');
+    $('#sf-title').firstChild.textContent = title;
+    msg.value = text;
+    const sync = () => {
+      let head = 'Hi Startline Labs' + (name.value.trim() ? ", it's " + name.value.trim() : '') + (biz.value.trim() ? ' from ' + biz.value.trim() : '') + '.\n';
+      const contact = [phone.value.trim() && 'Phone: ' + phone.value.trim(), email.value.trim() && 'Email: ' + email.value.trim()].filter(Boolean).join('\n');
+      const body = head + (contact ? contact + '\n' : '') + '\n' + msg.value.replace(/^Hi Startline Labs,?\s*/, '');
+      $('#sf-wa').href = WA + '?text=' + encodeURIComponent(body);
+      $('#sf-mail').href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent((/app/.test(title) ? 'App plan' : 'Project estimate') + (biz.value.trim() ? ' for ' + biz.value.trim() : '')) + '&body=' + encodeURIComponent(body);
+    };
+    [msg, name, biz, phone, email].forEach(el => { el.oninput = sync; });
+    sync();
+    if (sendDlg.showModal) sendDlg.showModal(); else sendDlg.setAttribute('open', '');
+    setTimeout(() => name.focus(), 50);
+  };
+
   /* ---------- estimator ---------- */
   const est = $('#est');
   if (est) {
@@ -445,6 +466,8 @@
     est.addEventListener('submit', e => e.preventDefault());
     if (copyBtn) copyBtn.addEventListener('click', () => copy(brief(last || compute()), 'Brief copied'));
     if (linkBtn) linkBtn.addEventListener('click', () => copy(linkTo('est', state()), 'Link to this estimate copied'));
+    const sendBtn = $('#e-send');
+    if (sendBtn) sendBtn.addEventListener('click', () => openSend(brief(last || compute()), 'Send your estimate'));
     setBase(baseEl().value);
     render();
 
@@ -669,6 +692,7 @@
     appq.addEventListener('submit', e => e.preventDefault());
     $('#a-copy').addEventListener('click', () => copy(brief(last || compute()), 'Brief copied'));
     $('#a-link').addEventListener('click', () => copy(linkTo('app', state()), 'Link to this plan copied'));
+    $('#a-send').addEventListener('click', () => openSend(brief(last || compute()), 'Send your app plan'));
     $$('[data-app]').forEach(btn => btn.addEventListener('click', () => {
       let ex;
       try { ex = JSON.parse(btn.dataset.app); } catch (e) { return; }
