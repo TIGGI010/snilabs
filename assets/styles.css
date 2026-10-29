@@ -999,3 +999,4 @@ html.splash .splash-screen .spd{animation:sl-spd 1.5s ease-out .15s both}
 @media (max-width:360px){.term-body{font-size:10.5px}.term{overflow:hidden}}
 html{overflow-x:clip}
 .stage-dev.on .dev{color:var(--blue);filter:drop-shadow(0 20px 30px color-mix(in srgb,var(--blue) 35%,transparent))}
+.proj-facts{grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
