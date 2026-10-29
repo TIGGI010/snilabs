@@ -1052,3 +1052,10 @@ html{overflow-x:clip}
 .follow a{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid var(--line-2);font-size:14.5px;font-weight:700;color:var(--ink);transition:border-color .2s,color .2s}
 .follow a:hover{border-color:var(--blue);color:var(--blue)}
 .follow svg{width:18px;height:18px}
+
+.foot{grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) minmax(0,1fr) minmax(0,.9fr)}
+.foot-social b{display:block;font-size:13px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.foot-social .social{margin-top:14px;flex-wrap:wrap}
+@media (max-width:980px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}.foot>div:first-child{grid-column:1/-1}}
+@media (max-width:560px){.foot{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.foot-social{grid-column:1/-1}}
+@media (max-width:560px){.foot{grid-template-columns:minmax(0,1fr)}.foot>ul:first-of-type{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 16px}}
