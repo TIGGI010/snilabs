@@ -401,7 +401,7 @@
     };
 
     const brief = q => {
-      let t = 'Hi Tiago, I used the estimator on your site.\n\n';
+      let t = 'Hi Startline Labs, I used the estimator on your site.\n\n';
       const said = briefBox ? briefBox.value.trim() : '';
       if (said) t += 'What I need: ' + said + '\n\n';
       t += 'Build: ' + q.label + '\n';
@@ -423,7 +423,7 @@
       outDep.textContent = payPlan(q.lo);
       outTime.textContent = weeksText(q.weeks);
       outMonthly.textContent = (q.care || q.run) ? fmt(q.care + q.run) + ' / month' : 'None';
-      if (monthK) monthK.textContent = q.run ? 'Monthly, incl. ' + fmt(q.run) + ' chatbot running' : 'Monthly after launch';
+      if (monthK) monthK.textContent = q.run ? 'Running costs a month, incl. ' + fmt(q.run) + ' chatbot' : 'Running costs a month (care plan)';
       if (careNote) careNote.textContent = q.careNote || '';
       fillLines(outLines, q.lines);
       wa.href = WA + '?text=' + encodeURIComponent(brief(q));
@@ -526,7 +526,7 @@
       if (!items.length) {
         const n = document.createElement('span');
         n.className = 'none';
-        n.textContent = said ? 'Choose the options below, or send it as it is and I will price it by hand.' : 'Type what you need above first.';
+        n.textContent = said ? 'Choose the options below, or send it as it is and we will price it by hand.' : 'Type what you need above first.';
         found.appendChild(n);
         return;
       }
@@ -629,7 +629,7 @@
         scale: scale.dataset.label, design: design.dataset.label, stage: stage.dataset.label };
     };
     const brief = q => {
-      let t = 'Hi Tiago, I planned an app on your site.\n\n';
+      let t = 'Hi Startline Labs, I planned an app on your site.\n\n';
       if (idea.value.trim()) t += 'The idea: ' + idea.value.trim() + '\n';
       if (like.value.trim()) t += 'A bit like: ' + like.value.trim() + '\n';
       t += '\nRuns on: ' + q.plat + '\nKind: ' + q.type + '\nFeatures: ' + (q.feats.join(', ') || 'none yet') + '\nScreens: ' + q.sc +
@@ -746,7 +746,7 @@
     const bubble = $('#c-bubble'), wa = $('#c-wa'), mail = $('#c-mail'), to = cf.dataset.email;
     const build = () => {
       const name = val('c-name'), biz = val('c-biz'), need = val('c-need') || 'a website', budget = val('c-budget'), msg = val('c-msg');
-      let t = 'Hi Tiago' + (name ? ", it's " + name : '') + (biz ? ' from ' + biz : '') + '.\n';
+      let t = 'Hi Startline Labs' + (name ? ", it's " + name : '') + (biz ? ' from ' + biz : '') + '.\n';
       t += "I'm looking for " + need + '.';
       if (budget) t += '\nBudget: ' + budget + '.';
       if (msg) t += '\n\n' + msg;
