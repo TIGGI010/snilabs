@@ -4,7 +4,8 @@
 | --- | --- |
 | `logo-horizontal.png` | Main logo on white or light backgrounds |
 | `logo-horizontal-white.png` | Logo on black or dark photos |
-| `mark-black.png`, `mark-white.png`, `mark.svg` | The `>_` mark on its own: app icons, favicons, stickers |
+| `mark-black.png`, `mark-white.png`, `mark.svg` | The start-line mark on its own: app icons, favicons, stickers |
+| `canva/` | Exports of the editable Canva design "Startline Labs logo — start line" (light, dark, Ready / Set / Go, profile picture) |
 | `profile-black.png` | Profile picture on every social account (1080×1080) |
 | `profile-blue.png` | Alternative profile picture, or for highlights and stories |
 | `banner-linkedin-1584x396.png` | LinkedIn page banner |
@@ -13,6 +14,6 @@
 | `banner-youtube-2560x1440.png` | YouTube channel art |
 
 **Colours:** black `#0A0A0B`, white `#FFFFFF`, blue `#0B5CFF` (on dark backgrounds use the lighter `#4D8DFF` for text).
-**Typeface:** Montserrat, ExtraBold (800) for headlines and the wordmark, Medium (500) for "labs" and body text.
-**The mark:** `>_` is a command-line prompt, the place every program starts: the start line.
-Keep clear space around the logo equal to the height of the `>` and never stretch, recolour or add effects to it.
+**Typeface:** Montserrat. Black (900) for "startline", Light (300) for "labs", ExtraBold (800) for headlines, Medium (500) for body text.
+**The mark:** a racing lane with a white start line. The blue block is the client's project. It has three states: Ready (behind the line), Set (on the line) and Go (across it, with speed lines). Go is the logo; the three together are the animation, used on the website header.
+Keep clear space around the logo equal to half the mark's width, and never stretch, recolour or add effects to it.

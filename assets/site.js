@@ -222,7 +222,8 @@
   const est = $('#est');
   if (est) {
     const fmt = n => 'R' + Math.round(n).toLocaleString('en-US');
-    const EXTRA_PAGE = 350, PER_10 = 180;
+    const EXTRA_PAGE = 450, PER_10 = 250, BOT_RUN = 450;
+    const WEB = ['landing', 'starter', 'business', 'advanced', 'store', 'update'];
     const pages = $('#e-pages'), products = $('#e-products');
     const pagesOut = $('#e-pages-out'), prodOut = $('#e-products-out');
     const adds = $$('input[data-add]', est);
@@ -235,11 +236,11 @@
     const compute = () => {
       const b = $('input[name="base"]:checked', est);
       let lo = +b.dataset.lo, hi = +b.dataset.hi;
-      const inc = +b.dataset.inc, store = b.value === 'store';
+      const inc = +b.dataset.inc, store = b.value === 'store', web = WEB.includes(b.value);
       const lines = [[b.dataset.label, fmt(lo) + ' – ' + fmt(hi)]];
       const np = +pages.value, over = Math.max(0, np - inc);
       if (over) { const c = over * EXTRA_PAGE; lo += c; hi += c; lines.push([over + ' extra page' + (over > 1 ? 's' : ''), '+' + fmt(c)]); }
-      const npr = +products.value;
+      const npr = web ? +products.value : 0;
       if (npr) { const c = Math.ceil(npr / 10) * PER_10; lo += c; hi += c; lines.push(['Loading ' + npr + ' products', '+' + fmt(c)]); }
       const picked = [];
       adds.forEach(cb => {
@@ -261,19 +262,23 @@
         lines.push([cb.dataset.label, '+' + fmt(a)]);
       });
       const c = $('input[name="care"]:checked', est);
-      return { lo, hi, lines, picked, care: +c.value, careLabel: c.dataset.label, careNote: c.dataset.note, np, npr, base: b.dataset.label };
+      const said = briefBox ? briefBox.value.toLowerCase() : '';
+      const botOn = picked.includes('AI chatbot') || (b.value === 'ai' && /\bchat ?bots?\b|\bbots?\b|whatsapp assistant|virtual assistant/.test(said));
+      const run = botOn ? BOT_RUN : 0;
+      return { lo, hi, lines, picked, run, care: +c.value, careLabel: c.dataset.label, careNote: c.dataset.note, np, npr, web, base: b.dataset.label };
     };
 
     const brief = q => {
       let t = 'Hi Tiago, I used the estimator on your site.\n\n';
       const said = briefBox ? briefBox.value.trim() : '';
       if (said) t += 'What I need: ' + said + '\n\n';
-      t += 'Build: ' + q.base + '\nPages: ' + q.np + '\n';
+      t += 'Build: ' + q.base + '\n';
+      if (q.web) t += 'Pages: ' + q.np + '\n';
       if (q.npr) t += 'Products to load: ' + q.npr + '\n';
       if (q.picked.length) t += 'Add-ons: ' + q.picked.join(', ') + '\n';
       t += 'Care plan: ' + q.careLabel + '\n\n';
       t += 'Estimate: ' + fmt(q.lo) + ' – ' + fmt(q.hi) + ' once-off';
-      if (q.care) t += ', plus ' + fmt(q.care) + ' a month';
+      if (q.care || q.run) t += ', plus ' + fmt(q.care + q.run) + ' a month';
       t += '\n\nCould we set up a quick call?';
       return t;
     };
@@ -288,6 +293,7 @@
       prodOut.textContent = products.value;
       const q = compute();
       last = q;
+      pages.closest('fieldset').hidden = !q.web;
       if (!shown || reduced) { shown = { lo: q.lo, hi: q.hi }; paint(q.lo, q.hi); }
       else {
         const from = { lo: shown.lo, hi: shown.hi }, t0 = performance.now();
@@ -301,7 +307,9 @@
         raf = requestAnimationFrame(tick);
       }
       outDep.textContent = fmt(q.lo / 2) + ' deposit to start';
-      outMonthly.textContent = q.care ? fmt(q.care) + ' / month' : 'None';
+      outMonthly.textContent = (q.care || q.run) ? fmt(q.care + q.run) + ' / month' : 'None';
+      const mk = $('#e-month-k');
+      if (mk) mk.textContent = q.run ? 'Monthly, incl. ' + fmt(q.run) + ' chatbot running' : 'Monthly after launch';
       if (careNote) careNote.textContent = q.careNote || '';
       outLines.textContent = '';
       q.lines.forEach(([k, v]) => {
@@ -325,6 +333,7 @@
       twelve: 12, fifteen: 15, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
     const NUMW = '(\\d+|' + Object.keys(WORDS).join('|') + ')';
     const toNum = w => (/^\d+$/.test(w) ? +w : WORDS[w]);
+    const AI = /\b(chatbot|chat bot|bot|ai|artificial intelligence|automate|automation|automations|whatsapp assistant|virtual assistant)\b/;
     const read = raw => {
       const t = ' ' + raw.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\bin store\b/g, ' ').replace(/\s+/g, ' ') + ' ';
       const has = re => re.test(t);
@@ -336,7 +345,11 @@
       if (has(/\b(update|updating|redesign|redo|refresh|revamp|fix|fixing|improve|existing|current (site|website)|old (site|website)|make changes)\b/) &&
           !has(/\bnew (website|site|store|shop)\b/)) p.base = 'update';
       else if (has(/\b(online store|store|shop|webshop|e ?commerce|sell (products|online|my products|stock)|checkout|cart)\b/) || (has(/\b(sell|selling|sells)\b/) && has(/\bonline\b/)) || p.products) p.base = 'store';
-      else if (has(/\b(booking|bookings|book online|appointments?|reservations?|job track\w*|portal|dashboards?|system|app|apps|android|application|crm|inventory|stock control)\b/)) p.base = 'system';
+      else if (has(/\b(mobile app|phone app|android|ios|iphone|play store|app store)\b/)) p.base = 'mobile';
+      else if (has(/\b(booking|bookings|book online|appointments?|reservations?|job track\w*|portal|system|app|apps|application|crm|inventory|stock control|web app)\b/)) p.base = 'system';
+      else if (AI.test(t) && !has(/\b(website|site|webpage|web page|pages?)\b/)) p.base = 'ai';
+      else if (has(/\b(dashboards?|reports?|analytics|power bi|data)\b/)) p.base = 'ai';
+      else if (has(/\b(security|cyber|popia|hacked|phishing)\b/) && !has(/\b(website|site)\b/)) p.base = 'security';
       else if (has(/\b(landing|one page|single page)\b/)) p.base = 'landing';
       else if (p.pages && p.pages > 5) p.base = 'advanced';
       else if (p.pages && p.pages <= 3) p.base = 'starter';
@@ -345,10 +358,14 @@
        ['pay', /\b(payments?|card payments?|pay online|pay by card|yoco|payfast|card machine|take cards?)\b/],
        ['brand', /\b(logo|brand|branding)\b/],
        ['copy', /\b(copywriting|copy writing|write the (words|content|text)|content writing|you write)\b/],
+       ['bot', AI],
+       ['sec', /\b(security|secure|cyber|popia|hacked|phishing)\b/],
        ['quote', /\b(quote|quotation|rfq)s? (form|system|request|requests|tool|builder)\b|\brequest (a )?quotes?\b|\b(request|enquiry) forms?\b/]
       ].forEach(([k, re]) => { if (has(re)) p.adds.push(k); });
-      if (has(/\b(growth|seo report|traffic report)\b/)) p.care = '1250';
-      else if (has(/\b(maintain|maintenance|look after|care plan|monthly support|ongoing|backups?|keep it (updated|running))\b/)) p.care = '599';
+      if (has(/\b(growth|seo report|traffic report)\b/)) p.care = '1500';
+      else if (has(/\b(maintain|maintenance|look after|care plan|monthly support|ongoing|backups?|keep it (updated|running))\b/)) p.care = '750';
+      if (p.base === 'ai') p.adds = p.adds.filter(k => k !== 'bot');
+      if (p.base === 'security') p.adds = p.adds.filter(k => k !== 'sec');
       return p;
     };
     const showFound = (items, said) => {
@@ -379,7 +396,7 @@
       if (p.base) {
         const r = $('input[name="base"][value="' + p.base + '"]', est);
         r.checked = true; items.push(r.dataset.label);
-        pages.value = Math.min(20, Math.max(1, p.pages || +r.dataset.inc || 1));
+        pages.value = Math.min(20, Math.max(1, p.pages || (WEB.includes(p.base) ? +r.dataset.inc : 5)));
       } else if (p.pages) pages.value = Math.min(20, Math.max(1, p.pages));
       if (p.pages) items.push(pages.value + ' pages');
       products.value = p.products ? Math.min(500, Math.max(10, Math.round(p.products / 10) * 10)) : 0;

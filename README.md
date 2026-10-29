@@ -26,7 +26,7 @@ Cloudflare Pages serves `/services` from `services.html`, so links use clean add
 
 Search the HTML for `data-todo`:
 
-- [ ] **Certifications** on `credentials.html`: name, issuer and year for each
+- [x] **Certifications** on `credentials.html`, with Coursera verification links
 - [ ] **Amedo live link** on `index.html` and `work.html` (and written permission to show the work)
 - [ ] **Amedo screenshot**, to replace the drawn browser mock-up
 - [ ] **Email**: `hello@startlinelabs.com` appears on every page; make sure the mailbox exists
