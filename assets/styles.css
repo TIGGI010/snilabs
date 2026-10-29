@@ -785,3 +785,56 @@ textarea.inp{resize:vertical;min-height:128px;line-height:1.5}
   .est-pill b{font-size:17px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
   .est-pill span{font-size:13.5px;font-weight:650;opacity:.9;white-space:nowrap}
 }
+
+/* ---------- splash ---------- */
+.splash-screen{display:none}
+html.splash .splash-screen{display:grid;place-items:center;position:fixed;inset:0;z-index:9999;background:#000;color:#F6F7F9;--bg:#000;--blue:#0B5CFF;
+  animation:splash-out .55s var(--ease) 1.9s forwards}
+html.splash .splash-screen .blk{animation:sl-go 1.5s cubic-bezier(.45,0,.2,1) .15s both}
+html.splash .splash-screen .spd{animation:sl-spd 1.5s ease-out .15s both}
+.splash-in{display:flex;flex-direction:column;align-items:center;gap:22px}
+.splash-mark svg{width:112px;height:112px;color:#F6F7F9}
+.splash-word{font-weight:900;font-size:34px;letter-spacing:-.035em;line-height:1;opacity:0;animation:splash-word .6s var(--ease) 1s forwards}
+.splash-word .labs{font-weight:300;color:#8A8D96}
+.splash-bar{display:block;width:140px;height:3px;border-radius:3px;background:#1E1F23;overflow:hidden}
+.splash-bar i{display:block;height:100%;width:100%;background:#0B5CFF;transform-origin:left;animation:splash-bar 1.7s cubic-bezier(.45,0,.2,1) forwards}
+@keyframes splash-out{to{opacity:0;visibility:hidden;transform:scale(1.02)}}
+@keyframes splash-word{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes splash-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* ---------- footer legal ---------- */
+.foot-legal{margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+.foot-legal p{max-width:820px;font-size:13px;line-height:1.6;color:var(--ink-3)}
+.legal-links{display:flex;flex-wrap:wrap;gap:6px 18px}
+.legal-links a{color:inherit}
+.legal-links a:hover{color:var(--ink)}
+
+/* ---------- legal page ---------- */
+.legal-doc{max-width:760px}
+.legal-doc h2{margin:48px 0 14px;font-size:clamp(26px,3vw,34px);font-weight:800;letter-spacing:-.04em;scroll-margin-top:calc(var(--header) + 24px)}
+.legal-doc h2:first-child{margin-top:0}
+.legal-doc h3{margin:24px 0 8px;font-size:17px;font-weight:750}
+.legal-doc p,.legal-doc li{font-size:15.5px;line-height:1.7;color:var(--ink-2)}
+.legal-doc ul{margin:8px 0 0;padding-left:20px;list-style:disc}
+.legal-doc a{color:var(--blue)}
+.legal-toc{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
+.legal-toc a{padding:8px 14px;border:1px solid var(--line-2);border-radius:999px;font-size:13.5px;font-weight:650;color:var(--ink-2)}
+.legal-toc a:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- credentials, the big version ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:28px;overflow:hidden}
+@media (max-width:820px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{display:flex;flex-direction:column;gap:6px;padding:clamp(22px,3vw,36px);background:var(--card)}
+.stat b{font-size:clamp(44px,6vw,84px);font-weight:900;letter-spacing:-.06em;line-height:.9;color:var(--blue);font-variant-numeric:tabular-nums}
+.stat span{font-size:14.5px;font-weight:600;color:var(--ink-2)}
+.issuers{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 34px;margin-top:clamp(24px,3vw,36px)}
+.issuers span{font-size:clamp(20px,2.4vw,30px);font-weight:800;letter-spacing:-.04em;color:var(--ink-3);transition:color .3s}
+.issuers span:hover{color:var(--ink)}
+.maps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.5vw,18px)}
+@media (max-width:980px){.maps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.maps{grid-template-columns:minmax(0,1fr)}}
+.map{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:10px;padding:26px;border:1px solid var(--line);border-radius:24px;background:var(--card);color:var(--ink)}
+.map .from-to{font-size:13px;font-weight:700;color:var(--blue)}
+.map h3{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.map p{font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.map .link{margin-top:auto;padding-top:6px;font-size:14px}

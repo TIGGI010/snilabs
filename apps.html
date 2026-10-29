@@ -6,6 +6,7 @@
 <title>App development — Startline Labs</title>
 <meta name="description" content="Plan your app feature by feature: Android, iPhone or web, with a live price range, timeline and monthly running cost. App development in Johannesburg.">
 <script>try{var t=localStorage.getItem('startline-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>try{if(!sessionStorage.getItem('startline-splash')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('splash')}catch(e){}</script>
 <link rel="canonical" href="https://startlinelab.com/apps">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Startline Labs">
@@ -29,6 +30,7 @@
 <script type="speculationrules">{"prerender":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}</script>
 </head>
 <body>
+<div class="splash-screen" aria-hidden="true"><div class="splash-in"><span class="splash-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8.5" fill="currentColor"/><path d="M3.5 9.5H28.5M3.5 22.5H28.5" fill="none" style="stroke:var(--bg)" stroke-opacity=".28" stroke-width="1.4" stroke-linecap="round"/><path class="spd" d="M15 14.2H18.3M16.2 17.8H18.3" fill="none" style="stroke:var(--blue)" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round"/><rect class="blk" x="20.6" y="13" width="6" height="6" rx="1.8" style="fill:var(--blue)"/><path d="M11 9.5V22.5" fill="none" style="stroke:var(--bg)" stroke-width="3" stroke-linecap="round"/></svg></span><span class="splash-word">startline<span class="labs"> labs</span></span><span class="splash-bar"><i></i></span></div></div>
 <a class="skip" href="#main">Skip to content</a>
 <div class="progress" aria-hidden="true"></div>
 <header class="site-header">
@@ -133,7 +135,10 @@
         <li><button type="button" data-cmdk>Search <kbd><span data-mod>⌘</span>K</kbd></button></li>
       </ul>
     </div>
-    <div class="foot-meta"><span>© 2026 Startline Labs · Tiago de Araujo, sole proprietor</span><span>Built like it has to last · This page loaded in <span data-loadtime>a moment</span></span></div>
+    <div class="foot-legal">
+      <p>Startline Labs, Johannesburg, South Africa. Prices on this site are estimates; the price you pay is the one in your signed, written quote. Personal information is handled in line with the Protection of Personal Information Act (POPIA).</p>
+    </div>
+    <div class="foot-meta"><span>© 2026 Startline Labs. All rights reserved.</span><nav class="legal-links" aria-label="Legal"><a href="/legal#privacy">Privacy and POPIA</a><a href="/legal#terms">Terms</a><a href="/legal#cookies">Cookies</a><a href="/legal#paia">PAIA</a></nav></div>
   </div>
   <div class="giant" aria-hidden="true"><span>startline<span class="u"></span></span></div>
 </footer>

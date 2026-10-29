@@ -10,6 +10,28 @@
   const PHONE = '065 769 1052';
   const WA = 'https://wa.me/27657691052';
 
+  /* ---------- splash: once a session, then out of the way ---------- */
+  if (root.classList.contains('splash')) {
+    try { sessionStorage.setItem('startline-splash', '1'); } catch (e) {}
+    setTimeout(() => root.classList.remove('splash'), 2500);
+  }
+
+  /* ---------- numbers that count up when they come into view ---------- */
+  const counters = $$('[data-count]');
+  if (counters.length && 'IntersectionObserver' in window) {
+    const run = el => {
+      const end = +el.dataset.count, t0 = performance.now(), dur = reduced ? 0 : 1100;
+      const tick = now => {
+        const k = dur ? Math.min(1, (now - t0) / dur) : 1;
+        el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } }), { threshold: 0.6 });
+    counters.forEach(el => io.observe(el));
+  }
+
   /* ---------- theme ---------- */
   const isDark = () => {
     const t = root.getAttribute('data-theme');
@@ -272,14 +294,14 @@
     const P = n => ({ person: 'people', 'user type': 'user types' }[n] || n + 's');
     /* each build type has its own sliders: what they count, what is included, what each extra costs */
     const SIZE = {
-      landing: { weeks: 1, legend: 'How long is the page?', r1: { label: 'Sections on the page', min: 3, max: 12, step: 1, value: 5, inc: 5, unit: 250, per: 1, noun: 'section' } },
-      starter: { weeks: 2, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 8, step: 1, value: 3, inc: 3, unit: 450, per: 1, noun: 'page' } },
-      business: { weeks: 3, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 15, step: 1, value: 6, inc: 6, unit: 450, per: 1, noun: 'page' } },
-      advanced: { weeks: 5, legend: 'How many pages?', r1: { label: 'Pages', min: 6, max: 30, step: 1, value: 12, inc: 12, unit: 400, per: 1, noun: 'page' } },
-      store: { weeks: 4, legend: 'How big is the shop?',
-        r1: { label: 'Products to load', min: 0, max: 1000, step: 10, value: 20, inc: 20, unit: 250, per: 10, noun: 'product' },
-        r2: { label: 'Pages besides the shop', min: 1, max: 15, step: 1, value: 6, inc: 6, unit: 450, per: 1, noun: 'page' } },
-      update: { weeks: 1, legend: 'How much changes?', r1: { label: 'Pages to change', min: 1, max: 20, step: 1, value: 3, inc: 3, unit: 350, per: 1, noun: 'page' } },
+      landing: { weeks: 1, legend: 'How long is the page?', r1: { label: 'Sections on the page', min: 3, max: 12, step: 1, value: 5, inc: 5, unit: 200, per: 1, noun: 'section' } },
+      starter: { weeks: 1, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 8, step: 1, value: 3, inc: 3, unit: 450, per: 1, noun: 'page' } },
+      business: { weeks: 2, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 15, step: 1, value: 6, inc: 8, unit: 450, per: 1, noun: 'page' } },
+      advanced: { weeks: 4, legend: 'How many pages?', r1: { label: 'Pages', min: 10, max: 40, step: 1, value: 16, inc: 20, unit: 450, per: 1, noun: 'page' } },
+      store: { weeks: 2, legend: 'How big is the shop?',
+        r1: { label: 'Products to load', min: 0, max: 1000, step: 10, value: 20, inc: 20, unit: 200, per: 10, noun: 'product' },
+        r2: { label: 'Pages besides the shop', min: 1, max: 15, step: 1, value: 6, inc: 8, unit: 450, per: 1, noun: 'page' } },
+      update: { weeks: 1, legend: 'How much changes?', r1: { label: 'Pages to change', min: 1, max: 20, step: 1, value: 3, inc: 3, unit: 300, per: 1, noun: 'page' } },
       system: { weeks: 6, legend: 'How big is the system?',
         r1: { label: 'Screens', min: 3, max: 40, step: 1, value: 8, inc: 8, unit: 900, per: 1, noun: 'screen' },
         r2: { label: 'Types of user (customer, staff, admin)', min: 1, max: 6, step: 1, value: 2, inc: 2, unit: 1500, per: 1, noun: 'user type' } },
@@ -482,15 +504,15 @@
       else if (!site && has(/\b(dashboards?|reports?|analytics|power bi|data)\b/)) p.base = 'ai';
       else if (!site && has(/\b(security|cyber|popia|hacked|phishing)\b/)) p.base = 'security';
       else if (has(/\b(landing|one page|single page)\b/)) p.base = 'landing';
-      else if (p.pages && p.pages > 15) p.base = 'advanced';
+      else if (p.pages && p.pages > 12) p.base = 'advanced';
       else if (p.pages && p.pages <= 3) p.base = 'starter';
       else if (has(/\b(wedding|portfolio|cv|resume)\b/)) p.base = 'starter';
       else if (site) p.base = 'business';
       ADD_WORDS.forEach(([k, re]) => { if (has(re)) p.adds.push(k); });
       if (p.base === 'ai') p.adds = p.adds.filter(k => k !== 'bot');
       if (p.base === 'security') p.adds = p.adds.filter(k => k !== 'sec');
-      if (has(/\b(growth|seo report|traffic report)\b/)) p.care = 1500;
-      else if (has(/\b(maintain|maintenance|look after|care plan|monthly support|ongoing|backups?|keep it (updated|running))\b/)) p.care = 750;
+      if (has(/\b(growth|seo report|traffic report)\b/)) p.care = 1200;
+      else if (has(/\b(maintain|maintenance|look after|care plan|monthly support|ongoing|backups?|keep it (updated|running))\b/)) p.care = 550;
       return p;
     };
     const showFound = (items, said) => {
