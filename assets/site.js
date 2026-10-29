@@ -291,7 +291,7 @@
     const box = btn.closest('.mapbox');
     const f = document.createElement('iframe');
     f.src = box.dataset.embed; f.title = 'Map: 30 Brunel Road, Thulisa Park'; f.loading = 'lazy';
-    f.referrerPolicy = 'no-referrer-when-downgrade'; f.allowFullscreen = true;
+    f.referrerPolicy = 'strict-origin-when-cross-origin'; f.allowFullscreen = true;
     box.classList.add('live'); box.appendChild(f);
   }));
 
