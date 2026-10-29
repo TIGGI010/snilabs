@@ -228,6 +228,7 @@
     const adds = $$('input[data-add]', est);
     const outTotal = $('#e-total'), outDep = $('#e-deposit'), outLines = $('#e-lines'), outMonthly = $('#e-monthly');
     const wa = $('#e-wa'), copyBtn = $('#e-copy'), careNote = $('#e-care-note');
+    const briefBox = $('#e-brief'), parseBtn = $('#e-parse'), found = $('#e-found');
     const fill = r => r.style.setProperty('--p', ((r.value - r.min) / (r.max - r.min) * 100) + '%');
     let shown = null, raf = 0, last = null;
 
@@ -265,6 +266,8 @@
 
     const brief = q => {
       let t = 'Hi Tiago, I used the estimator on your site.\n\n';
+      const said = briefBox ? briefBox.value.trim() : '';
+      if (said) t += 'What I need: ' + said + '\n\n';
       t += 'Build: ' + q.base + '\nPages: ' + q.np + '\n';
       if (q.npr) t += 'Products to load: ' + q.npr + '\n';
       if (q.picked.length) t += 'Add-ons: ' + q.picked.join(', ') + '\n';
@@ -316,7 +319,140 @@
     est.addEventListener('submit', e => e.preventDefault());
     if (copyBtn) copyBtn.addEventListener('click', () => copy(brief(last || compute()), 'Brief copied'));
     render();
+
+    /* read a plain-English description and set the estimator from it */
+    const WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11,
+      twelve: 12, fifteen: 15, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
+    const NUMW = '(\\d+|' + Object.keys(WORDS).join('|') + ')';
+    const toNum = w => (/^\d+$/.test(w) ? +w : WORDS[w]);
+    const read = raw => {
+      const t = ' ' + raw.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\bin store\b/g, ' ').replace(/\s+/g, ' ') + ' ';
+      const has = re => re.test(t);
+      const p = { base: null, pages: null, products: null, adds: [], care: null };
+      let m = t.match(new RegExp('\\b' + NUMW + ' (?:[a-z]+ ){0,2}pages?\\b'));
+      if (m) p.pages = toNum(m[1]);
+      m = t.match(new RegExp('\\b' + NUMW + ' (?:[a-z]+ ){0,2}(?:products?|items?|skus?|listings?)\\b'));
+      if (m) p.products = toNum(m[1]);
+      if (has(/\b(update|updating|redesign|redo|refresh|revamp|fix|fixing|improve|existing|current (site|website)|old (site|website)|make changes)\b/) &&
+          !has(/\bnew (website|site|store|shop)\b/)) p.base = 'update';
+      else if (has(/\b(online store|store|shop|webshop|e ?commerce|sell (products|online|my products|stock)|checkout|cart)\b/) || (has(/\b(sell|selling|sells)\b/) && has(/\bonline\b/)) || p.products) p.base = 'store';
+      else if (has(/\b(booking|bookings|book online|appointments?|reservations?|job track\w*|portal|dashboards?|system|app|apps|android|application|crm|inventory|stock control)\b/)) p.base = 'system';
+      else if (has(/\b(landing|one page|single page)\b/)) p.base = 'landing';
+      else if (p.pages && p.pages > 5) p.base = 'advanced';
+      else if (p.pages && p.pages <= 3) p.base = 'starter';
+      else if (has(/\b(website|site|webpage|web page|pages?)\b/)) p.base = 'business';
+      [['setup', /\b(email|emails|workspace|domain|gmail|google business|google maps|maps|listed on google)\b/],
+       ['pay', /\b(payments?|card payments?|pay online|pay by card|yoco|payfast|card machine|take cards?)\b/],
+       ['brand', /\b(logo|brand|branding)\b/],
+       ['copy', /\b(copywriting|copy writing|write the (words|content|text)|content writing|you write)\b/],
+       ['quote', /\b(quote|quotation|rfq)s? (form|system|request|requests|tool|builder)\b|\brequest (a )?quotes?\b|\b(request|enquiry) forms?\b/]
+      ].forEach(([k, re]) => { if (has(re)) p.adds.push(k); });
+      if (has(/\b(growth|seo report|traffic report)\b/)) p.care = '1250';
+      else if (has(/\b(maintain|maintenance|look after|care plan|monthly support|ongoing|backups?|keep it (updated|running))\b/)) p.care = '599';
+      return p;
+    };
+    const showFound = (items, said) => {
+      found.hidden = false;
+      found.textContent = '';
+      const lbl = document.createElement('span');
+      lbl.className = 'lbl';
+      lbl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9Z"/></svg>';
+      lbl.append(items.length ? 'Picked up' : 'Nothing specific yet');
+      found.appendChild(lbl);
+      if (!items.length) {
+        const n = document.createElement('span');
+        n.className = 'none';
+        n.textContent = said ? 'Choose the options below, or send it as it is and I will price it by hand.' : 'Type what you need above first.';
+        found.appendChild(n);
+        return;
+      }
+      items.forEach((txt, i) => {
+        const c = document.createElement('span');
+        c.className = 'chip'; c.style.setProperty('--i', i); c.textContent = txt;
+        found.appendChild(c);
+      });
+    };
+    const applyBrief = (scroll) => {
+      const said = briefBox.value.trim();
+      if (!said) { showFound([], ''); return; }
+      const p = read(said), items = [];
+      if (p.base) {
+        const r = $('input[name="base"][value="' + p.base + '"]', est);
+        r.checked = true; items.push(r.dataset.label);
+        pages.value = Math.min(20, Math.max(1, p.pages || +r.dataset.inc || 1));
+      } else if (p.pages) pages.value = Math.min(20, Math.max(1, p.pages));
+      if (p.pages) items.push(pages.value + ' pages');
+      products.value = p.products ? Math.min(500, Math.max(10, Math.round(p.products / 10) * 10)) : 0;
+      if (p.products) items.push(products.value + ' products');
+      render();
+      adds.forEach(cb => {
+        if (cb.disabled) { if (p.adds.includes(cb.dataset.key)) items.push(cb.dataset.label + ', included'); return; }
+        cb.checked = p.adds.includes(cb.dataset.key);
+        if (cb.checked) items.push(cb.dataset.label);
+      });
+      if (p.care) {
+        const c = $('input[name="care"][value="' + p.care + '"]', est);
+        if (c) { c.checked = true; items.push('Care: ' + c.dataset.label); }
+      }
+      render();
+      showFound(items, said);
+      if (scroll) {
+        const target = window.innerWidth < 920 ? $('.est-out') : est;
+        target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      }
+    };
+    if (briefBox) {
+      parseBtn.addEventListener('click', () => applyBrief(true));
+      briefBox.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); applyBrief(true); } });
+      briefBox.addEventListener('input', () => render());
+      $$('[data-example]').forEach(b => b.addEventListener('click', () => {
+        briefBox.value = b.getAttribute('data-example');
+        applyBrief(false);
+      }));
+      let incoming = '';
+      try { incoming = sessionStorage.getItem('startline-brief') || ''; sessionStorage.removeItem('startline-brief'); } catch (e) {}
+      if (!incoming) { try { incoming = new URLSearchParams(location.search).get('brief') || ''; } catch (e) {} }
+      if (incoming) {
+        briefBox.value = incoming;
+        applyBrief(false);
+        setTimeout(() => $('#estimate').scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
+      }
+    }
   }
+
+  /* ---------- home prompt bar: carry the description to the estimator ---------- */
+  $$('form[data-ask]').forEach(f => {
+    const box = $('textarea', f);
+    const send = () => {
+      const said = box.value.trim();
+      if (!said) { box.focus(); return; }
+      try { sessionStorage.setItem('startline-brief', said); location.href = f.dataset.target; }
+      catch (e) { location.href = f.getAttribute('action') + '?brief=' + encodeURIComponent(said) + '#estimate'; }
+    };
+    f.addEventListener('submit', e => { e.preventDefault(); send(); });
+    box.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  });
+
+  /* ---------- placeholders that type out example requests ---------- */
+  const EXAMPLES = ['An online store for about 40 products with card payments…', 'Update my existing website and add a quote form…',
+    'A booking system for my salon…', 'A five-page website for my plumbing business, with a logo…', 'An Android app for my delivery drivers…'];
+  if (!reduced) $$('textarea[data-cycle]').forEach(box => {
+    const base = box.getAttribute('placeholder');
+    let i = 0, c = 0, dir = 1, wait = 0, stop = false;
+    const halt = () => { stop = true; box.setAttribute('placeholder', base); };
+    box.addEventListener('focus', halt);
+    box.addEventListener('input', halt);
+    const tick = () => {
+      if (stop) return;
+      const w = EXAMPLES[i];
+      if (wait > 0) wait -= 1;
+      else if (dir > 0) { c += 1; if (c >= w.length) { dir = -1; wait = 38; } }
+      else { c -= 2; if (c <= 0) { c = 0; dir = 1; i = (i + 1) % EXAMPLES.length; wait = 6; } }
+      box.setAttribute('placeholder', w.slice(0, Math.max(0, c)) || base);
+      setTimeout(tick, dir > 0 ? 42 : 18);
+    };
+    setTimeout(tick, 1400);
+  });
 
   /* ---------- contact composer ---------- */
   const cf = $('#compose');

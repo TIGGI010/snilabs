@@ -705,3 +705,38 @@ textarea.inp{resize:vertical;min-height:128px;line-height:1.5}
 .details span,.details a{display:block;margin-top:4px;font-size:15px;color:var(--ink-2);overflow-wrap:anywhere}
 .details a:hover{color:var(--blue)}
 
+
+/* ---------- describe-it prompt bar ---------- */
+.ask{position:relative;display:block;margin-top:30px;border:1px solid var(--line-2);border-radius:22px;background:var(--card);
+  box-shadow:0 18px 40px -26px rgba(10,10,11,.35);transition:box-shadow .35s var(--ease)}
+.ask.ring{border-color:transparent;
+  background:linear-gradient(var(--card),var(--card)) padding-box,conic-gradient(from var(--a),var(--line-2) 0deg,var(--line-2) 210deg,var(--blue) 300deg,var(--line-2) 360deg) border-box}
+@media (prefers-reduced-motion:no-preference){.ask.ring{animation:spin 6s linear infinite}}
+.ask:focus-within{box-shadow:0 0 0 4px rgba(11,92,255,.14),0 24px 48px -24px rgba(11,92,255,.5)}
+.ask-input{display:block;width:100%;min-height:104px;max-height:260px;field-sizing:content;resize:none;border:0;outline:0;background:transparent;
+  padding:18px 76px 18px 20px;font-size:16.5px;font-weight:500;line-height:1.5;color:var(--ink)}
+.ask-input::placeholder{color:var(--ink-3);opacity:1}
+.ask-go{position:absolute;right:12px;bottom:12px;width:46px;height:46px;border-radius:15px;border:0;background:var(--btn);color:#FFFFFF;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 10px 22px -10px rgba(11,92,255,.8);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.ask-go:hover{transform:translateY(-2px)}
+.ask-go:active{transform:scale(.95)}
+.ask-go svg{width:21px;height:21px;stroke-width:2.2}
+.ask-meta{margin-top:14px;font-size:14px;font-weight:550;color:var(--ink-2)}
+.ask-meta a{color:var(--ink);font-weight:700;border-bottom:1.5px solid var(--blue);transition:color .2s}
+.ask-meta a:hover{color:var(--blue)}
+.ask-card{margin-bottom:clamp(28px,3.4vw,44px)}
+.ask-card .ask{margin-top:0}
+.ask-ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.ask-ex button{text-align:left;padding:8px 14px;border:1px solid var(--line-2);border-radius:999px;background:transparent;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;
+  transition:border-color .2s,color .2s,background-color .2s}
+.ask-ex button:hover{border-color:var(--ink);color:var(--ink)}
+.ask-found{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line)}
+.ask-found .lbl{display:inline-flex;align-items:center;gap:8px;margin-right:4px;font-size:13.5px;font-weight:700;color:var(--ink)}
+.ask-found .lbl svg{width:17px;height:17px;color:var(--blue)}
+.ask-found .chip{background:color-mix(in srgb,var(--blue) 11%,transparent);color:var(--blue)}
+.ask-found .none{font-size:13.5px;color:var(--ink-2)}
+@media (prefers-reduced-motion:no-preference){.ask-found .chip{animation:pop .45s var(--ease) both;animation-delay:calc(var(--i) * 60ms)}}
+.choice.wide{grid-column:1/-1}
+.choice.wide .choice-body{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.choice.wide .choice-body em{margin:0 0 0 auto}
+.est-brief{margin-top:4px;font-size:13px;color:var(--ink-2);font-style:italic;overflow-wrap:anywhere}

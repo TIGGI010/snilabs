@@ -89,7 +89,16 @@
 
 <section class="section" id="estimate">
   <div class="wrap">
-    <div class="head reveal"><div><h2 class="h2">Estimate your project<span class="dot">.</span></h2><p class="lead">Choose what you need and the number moves with you. Send it straight to WhatsApp when it looks right.</p></div></div>
+    <div class="head reveal"><div><h2 class="h2">Estimate your project<span class="dot">.</span></h2><p class="lead">Describe it in your own words, or pick the options yourself. The number moves as you go, and you can send it straight to WhatsApp.</p></div></div>
+    <div class="ask-card reveal">
+      <div class="ask ring">
+        <label class="sr" for="e-brief">Describe what you want built or updated</label>
+        <textarea class="ask-input" id="e-brief" rows="2" placeholder="Describe what you want built or updated" data-cycle></textarea>
+        <button class="ask-go" type="button" id="e-parse" aria-label="Estimate from my description"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+      </div>
+      <div class="ask-ex"><button type="button" data-example="An online store for about 40 products with card payments">An online store for about 40 products with card payments</button><button type="button" data-example="Update my existing website and add a quote form">Update my existing website and add a quote form</button><button type="button" data-example="A booking system for my salon">A booking system for my salon</button><button type="button" data-example="A five-page website for my plumbing business with a logo">A five-page website for my plumbing business with a logo</button></div>
+      <div class="ask-found" id="e-found" aria-live="polite" hidden></div>
+    </div>
     <form class="est reveal" id="est" novalidate>
       <div>
         <fieldset class="eg"><legend>What are we building?</legend>
@@ -100,6 +109,7 @@
             <label class="choice"><input type="radio" name="base" value="advanced" data-lo="8000" data-hi="15000" data-inc="10" data-label="Advanced website"><span class="choice-body"><b>Advanced website</b><small>Up to 10 pages</small><em>R8,000+</em></span></label>
             <label class="choice"><input type="radio" name="base" value="store" data-lo="7500" data-hi="15000" data-inc="5" data-label="Online store"><span class="choice-body"><b>Online store</b><small>Checkout and payments</small><em>R7,500+</em></span></label>
             <label class="choice"><input type="radio" name="base" value="system" data-lo="7000" data-hi="15000" data-inc="6" data-label="Booking or job system"><span class="choice-body"><b>Booking or job system</b><small>Built around your process</small><em>R7,000+</em></span></label>
+            <label class="choice wide"><input type="radio" name="base" value="update" data-lo="1500" data-hi="4000" data-inc="5" data-label="Update an existing site"><span class="choice-body"><b>Update an existing site</b><small>Refresh, fix or extend what you have</small><em>R1,500+</em></span></label>
           </div>
         </fieldset>
         <fieldset class="eg"><legend>How big?</legend>

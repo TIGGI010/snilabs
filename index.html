@@ -52,11 +52,13 @@
     <div class="hero-row">
       <div>
         <p class="lead enter" style="--d:2">Startline Labs is a software studio in Johannesburg. Websites, online stores, apps and the systems behind them, built for South African businesses at a fixed price agreed before work starts.</p>
-        <div class="ctas enter" style="--d:3">
-          <a class="btn btn-primary" href="/pricing#estimate">Get an estimate<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="btn btn-ghost" href="https://wa.me/27766108159" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 1 3.4 6.3L4 19.5l1.2-3.7A7.4 7.4 0 0 1 4.5 12Z"/></svg>076 610 8159</a>
-        </div>
-        <ul class="ticks enter" style="--d:4">
+        <form class="ask ring enter" style="--d:3" action="/pricing" method="get" data-ask data-target="/pricing#estimate">
+          <label class="sr" for="h-brief">Describe what you want built or updated</label>
+          <textarea class="ask-input" id="h-brief" name="brief" rows="2" placeholder="Describe what you want built or updated" data-cycle></textarea>
+          <button class="ask-go" type="submit" aria-label="Get a rough estimate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+        </form>
+        <p class="ask-meta enter" style="--d:4">Get a rough estimate in seconds, or <a href="https://wa.me/27766108159" target="_blank" rel="noopener">WhatsApp 076 610 8159</a></p>
+        <ul class="ticks enter" style="--d:5">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.6 2.6 5-5.3"/></svg>Fixed price, agreed in writing</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.6 2.6 5-5.3"/></svg>50% to start, 50% at launch</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.6 2.6 5-5.3"/></svg>Your domain and accounts, in your name</li>
