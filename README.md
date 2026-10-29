@@ -29,13 +29,15 @@ Search the HTML for `data-todo`:
 - [x] **Certifications** on `credentials.html`, with Coursera verification links
 - [ ] **Amedo live link** on `index.html` and `work.html` (and written permission to show the work)
 - [ ] **Amedo screenshot**, to replace the drawn browser mock-up
-- [ ] **Email**: `hello@startlinelabs.com` appears on every page; make sure the mailbox exists
+- [ ] **Email**: `hello@startlinelab.com` appears on every page; make sure the mailbox exists
+- [ ] **Domain**: add `startlinelab.com` as the custom domain in Cloudflare Pages, then redirect `startlinelab.co.za` (and `www.`) to it with a Cloudflare redirect rule (301)
+- [ ] **WhatsApp**: the site's WhatsApp buttons go to 065 769 1052, so set that number up on WhatsApp Business
 
 ## Prices
 
 The estimator reads its numbers from the HTML in `pricing.html`: `data-lo`, `data-hi` and
 `data-inc` on each build option, `data-add` on each add-on, and the care plan values. Extra pages
-(R350 each) and products (R180 per 10) are set at the top of the estimator in `assets/site.js`.
+(R450 each) and products (R250 per 10) are set at the top of the estimator in `assets/site.js`.
 
 ## Deploy
 

@@ -7,8 +7,8 @@
   const mq = q => (window.matchMedia ? window.matchMedia(q) : { matches: false });
   const reduced = mq('(prefers-reduced-motion: reduce)').matches;
   const canHover = mq('(hover: hover)').matches;
-  const PHONE = '076 610 8159';
-  const WA = 'https://wa.me/27766108159';
+  const PHONE = '065 769 1052';
+  const WA = 'https://wa.me/27657691052';
 
   /* ---------- theme ---------- */
   const isDark = () => {
