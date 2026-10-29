@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /signature
 
 Sitemap: https://startlinelab.com/sitemap.xml
-Disallow: /signature
