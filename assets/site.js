@@ -848,4 +848,145 @@
     const ms = Math.round(performance.now());
     lt.forEach(el => { el.textContent = ms + ' ms'; });
   }));
+
+  /* ---------- free website check (Google PageSpeed Insights, run in the visitor's browser) ---------- */
+  const chk = $('#chk');
+  if (chk) {
+    const PSI_KEY = '';   // optional: a Google API key restricted to startlinelab.com raises the free quota
+    const urlIn = $('#chk-url'), go = $('#chk-go'), wait = $('#chk-wait'), err = $('#chk-err'), out = $('#chk-out');
+    let report = '', ticker = null;
+    const norm = v => { v = (v || '').trim(); if (!v) return ''; if (!/^https?:\/\//i.test(v)) v = 'https://' + v; try { const u = new URL(v); return u.hostname.includes('.') ? u.href : ''; } catch (e) { return ''; } };
+    const grade = sc => sc >= 0.9 ? ['good', 'Good'] : sc >= 0.5 ? ['mid', 'Needs work'] : ['bad', 'Poor'];
+    const PLAIN = {
+      'is-on-https': ['Uses HTTPS, the padlock in the address bar', 'Not fully on HTTPS, so browsers may warn visitors'],
+      'viewport': ['Set up for phone screens', 'Not set up for phone screens'],
+      'document-title': ['Has a page title for Google', 'Missing a page title for Google'],
+      'meta-description': ['Has a search description', 'No search description, so Google guesses one'],
+      'is-crawlable': ['Google is allowed to list it', 'Blocked from appearing on Google'],
+      'http-status-code': ['The address works, with no broken page', 'The page returns an error code'],
+      'image-alt': ['Images are described for Google and screen readers', 'Some images have no description'],
+      'link-text': ['Links say where they lead', 'Some links say "click here" instead of where they lead'],
+      'color-contrast': ['Text is easy to read', 'Some text is hard to read against its background'],
+      'target-size': ['Buttons are easy to tap', 'Some buttons or links are too small to tap easily'],
+      'errors-in-console': ['No errors in the browser', 'The page shows errors in the browser'],
+      'render-blocking-resources': ['Nothing holds up the first view', 'Some files hold up the page before it shows'],
+      'modern-image-formats': ['Images use modern formats', 'Images could be smaller and load faster'],
+      'uses-optimized-images': ['Images are compressed', 'Some images are larger than they need to be'],
+      'unused-javascript': ['Little unused code', 'The page loads code it does not use'],
+    };
+    const li = (cls, t) => `<li class="${cls}">${t}</li>`;
+    const steps = $$('.chk-steps li', wait);
+    const showStep = i => steps.forEach((s, k) => { s.classList.toggle('on', k === i); s.classList.toggle('done', k < i); });
+    const stop = () => { clearInterval(ticker); go.disabled = false; go.classList.remove('busy'); };
+    chk.addEventListener('submit', async e => {
+      e.preventDefault();
+      const url = norm(urlIn.value);
+      err.hidden = true; out.hidden = true;
+      if (!url) { err.hidden = false; err.textContent = 'Enter a website address, such as yourbusiness.co.za.'; urlIn.focus(); return; }
+      go.disabled = true; go.classList.add('busy'); wait.hidden = false;
+      let step = 0; showStep(0); ticker = setInterval(() => showStep(Math.min(++step, steps.length - 1)), 6000);
+      const q = new URLSearchParams({ url, strategy: 'MOBILE', locale: 'en' });
+      ['PERFORMANCE', 'ACCESSIBILITY', 'BEST_PRACTICES', 'SEO'].forEach(c => q.append('category', c));
+      if (PSI_KEY) q.set('key', PSI_KEY);
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 90000);
+      try {
+        const res = await fetch('https://www.googleapis.com/pagespeedonline/v5/runPagespeed?' + q, { signal: ctl.signal });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const busy = res.status === 429;
+          throw new Error(busy ? 'The free checker is busy right now. Try again in a minute, or send us your link on WhatsApp and we will check it for you.'
+            : 'We could not test that address. Check it opens in your browser, then try again.');
+        }
+        const lh = data.lighthouseResult || {};
+        if (lh.runtimeError && lh.runtimeError.code && lh.runtimeError.code !== 'NO_ERROR') throw new Error('Google could not load that website. Check the address opens in your browser, then try again.');
+        const C = lh.categories || {}, A = lh.audits || {};
+        const cats = [['performance', 'Speed'], ['accessibility', 'Mobile and accessibility'], ['seo', 'Search'], ['best-practices', 'Security and best practice']];
+        const scores = {};
+        $('#chk-scores').innerHTML = cats.map(([k, label]) => {
+          const sc = C[k] && typeof C[k].score === 'number' ? C[k].score : null; scores[k] = sc;
+          if (sc === null) return '';
+          const [cls, word] = grade(sc), n = Math.round(sc * 100);
+          return `<div class="chk-score ${cls}"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.5" class="t"/><circle cx="18" cy="18" r="15.5" class="v" style="stroke-dasharray:${(n * 97.4 / 100).toFixed(1)} 97.4"/></svg><b>${n}</b><span>${label}</span><em>${word}</em></div>`;
+        }).join('');
+        const fix = [], ok = [];
+        const lcp = A['largest-contentful-paint'];
+        if (lcp && typeof lcp.numericValue === 'number') {
+          const sec = (lcp.numericValue / 1000).toFixed(1);
+          (lcp.numericValue > 2500 ? fix : ok).push(lcp.numericValue > 2500 ? `The main content takes ${sec} s to appear on a phone. Aim for under 2.5 s.` : `The main content appears in ${sec} s on a phone.`);
+        }
+        Object.keys(PLAIN).forEach(id => {
+          const a = A[id]; if (!a || a.score === null || a.score === undefined || a.scoreDisplayMode === 'notApplicable') return;
+          (a.score >= 0.9 ? ok : fix).push(PLAIN[id][a.score >= 0.9 ? 0 : 1]);
+        });
+        $('#chk-fix').innerHTML = (fix.length ? fix.slice(0, 8) : ['Nothing urgent. Nice work.']).map(t => li('', t)).join('');
+        $('#chk-ok').innerHTML = ok.slice(0, 8).map(t => li('', t)).join('');
+        const host = new URL(lh.finalDisplayedUrl || lh.finalUrl || url).hostname.replace(/^www\./, '');
+        $('#chk-site').textContent = host;
+        $('#chk-time').textContent = new Date().toLocaleString('en-ZA', { dateStyle: 'medium', timeStyle: 'short' });
+        report = `Hi Startline Labs, I ran the free website check on ${host}.\n\n` + cats.filter(([k]) => scores[k] !== null).map(([k, l]) => `${l}: ${Math.round(scores[k] * 100)}/100`).join('\n')
+          + (fix.length ? `\n\nTo fix:\n- ${fix.slice(0, 8).join('\n- ')}` : '') + `\n\nPlease send me a fixed-price fix list.`;
+        wait.hidden = true; out.hidden = false;
+        out.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      } catch (x) {
+        wait.hidden = true; err.hidden = false;
+        err.textContent = x.name === 'AbortError' ? 'That took too long. The site may be very slow or offline. Try again, or send us the link on WhatsApp.' : (x.message || 'Something went wrong. Try again in a minute.');
+      } finally { clearTimeout(to); stop(); }
+    });
+    const biz = $('#chk-biz'), maps = $('#chk-maps');
+    if (biz) biz.addEventListener('input', () => { maps.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(biz.value.trim()); });
+    const sendBtn = $('#chk-send');
+    if (sendBtn) sendBtn.addEventListener('click', () => {
+      const lab = $('label[for="sf-msg"]'); if (lab) lab.textContent = 'Your report';
+      openSend(report, 'Send your report');
+    });
+  }
+
+  /* ---------- book a free 20-minute call: pick a slot, request it on WhatsApp or email ---------- */
+  const bdays = $('#book-days');
+  if (bdays) {
+    const HOLIDAYS = ['2026-12-16', '2026-12-25', '2027-01-01', '2027-03-22', '2027-03-26', '2027-03-29', '2027-04-27', '2027-05-01', '2027-06-16', '2027-08-09'];
+    const SLOTS = ['09:00', '10:30', '12:00', '14:00', '15:30'];
+    const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const sast = () => new Date(Date.now() + 2 * 3600e3);              // read with UTC getters = South African time
+    const iso = d => d.toISOString().slice(0, 10);
+    const now = sast(), nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+    const days = []; const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    while (days.length < 10) {
+      const wd = d.getUTCDay(), key = iso(d), today = key === iso(now);
+      const open = SLOTS.filter(t => !today || (+t.slice(0, 2) * 60 + +t.slice(3)) > nowMin + 120);
+      if (wd > 0 && wd < 6 && !HOLIDAYS.includes(key) && open.length) days.push({ key, wd, date: d.getUTCDate(), m: d.getUTCMonth(), open });
+      d.setUTCDate(d.getUTCDate() + 1);
+    }
+    let pick = { day: null, time: null };
+    const slotsBox = $('#book-slots'), pickBox = $('#book-pick'), wa = $('#bk-wa'), mail = $('#bk-mail');
+    const label = () => pick.day && pick.time ? `${DAYS[pick.day.wd]} ${pick.day.date} ${MONTHS[pick.day.m]} at ${pick.time}` : '';
+    const renderSlots = () => {
+      slotsBox.innerHTML = pick.day ? pick.day.open.map(t => `<button type="button" class="book-slot${t === pick.time ? ' on' : ''}" role="option" aria-selected="${t === pick.time}" data-t="${t}">${t}</button>`).join('')
+        : '<p class="chk-hint">Choose a day first.</p>';
+    };
+    const update = () => {
+      const when = label(); pickBox.textContent = when ? when + ' (SAST)' : 'Choose a day and a time'; pickBox.classList.toggle('set', !!when);
+      const v = id => ($('#' + id).value || '').trim();
+      const msg = `Hi Startline Labs, I'd like to book a free 20-minute call.\n\nWhen: ${when || '(time to be agreed)'}\nHow: ${v('bk-way')}\nAbout: ${v('bk-topic')}`
+        + (v('bk-name') ? `\nName: ${v('bk-name')}` : '') + (v('bk-biz') ? `\nBusiness: ${v('bk-biz')}` : '')
+        + (v('bk-phone') ? `\nPhone: ${v('bk-phone')}` : '') + (v('bk-email') ? `\nEmail: ${v('bk-email')}` : '') + (v('bk-note') ? `\n\n${v('bk-note')}` : '');
+      wa.href = WA + '?text=' + encodeURIComponent(msg);
+      mail.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Free call request' + (when ? ': ' + when : ''))}&body=${encodeURIComponent(msg)}`;
+      [wa, mail].forEach(a => a.setAttribute('aria-disabled', when ? 'false' : 'true'));
+    };
+    bdays.innerHTML = days.map((x, i) => `<button type="button" class="book-day" role="option" aria-selected="false" data-i="${i}"><small>${DAYS[x.wd].slice(0, 3)}</small><b>${x.date}</b><small>${MONTHS[x.m].slice(0, 3)}</small></button>`).join('');
+    bdays.addEventListener('click', e => {
+      const b = e.target.closest('.book-day'); if (!b) return;
+      pick = { day: days[+b.dataset.i], time: null };
+      $$('.book-day', bdays).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
+      renderSlots(); update();
+    });
+    slotsBox.addEventListener('click', e => { const b = e.target.closest('.book-slot'); if (!b) return; pick.time = b.dataset.t; renderSlots(); update(); });
+    $('#book-form').addEventListener('input', update);
+    $('#book-form').addEventListener('submit', e => e.preventDefault());
+    [wa, mail].forEach(a => a.addEventListener('click', e => { if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); pickBox.classList.add('nudge'); setTimeout(() => pickBox.classList.remove('nudge'), 700); } }));
+    renderSlots(); update();
+  }
+
 })();
