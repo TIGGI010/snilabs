@@ -1145,3 +1145,4 @@ img.rv-av{object-fit:cover;background:#fff;border:1px solid var(--line)}
 .work-note{display:flex;gap:10px;align-items:flex-start;margin:-8px 0 22px;font-size:14.5px;line-height:1.5;color:var(--ink-3)}
 .work-note svg{width:18px;height:18px;flex:none;margin-top:1px}
 .case .status{margin:0 0 10px;padding-top:0}
+.app-lg .link{display:flex;width:fit-content;margin-top:18px}
