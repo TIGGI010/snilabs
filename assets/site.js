@@ -989,4 +989,40 @@
     renderSlots(); update();
   }
 
+
+  /* ---------- project brief: answers composed into one message for WhatsApp, email or the clipboard ---------- */
+  const bform = $('#brief-form');
+  if (bform) {
+    const pre = new URLSearchParams(location.search).get('need');
+    if (pre) $$('input[name="need"]', bform).forEach(i => { if (i.dataset.v === pre) i.checked = true; });
+    const ticked = n => $$(`input[name="${n}"]:checked`, bform).map(i => i.value);
+    const build = () => {
+      const lines = ['Hi Startline Labs, here is my project brief.', ''];
+      $$('[data-q]', bform).slice(0, 6).forEach(f => f.value.trim() && lines.push(`${f.dataset.q}: ${f.value.trim()}`));
+      const add = (label, xs) => xs.length && lines.push('', `${label}: ${xs.join(', ')}`);
+      add('I need', ticked('need')); add('Goals', ticked('goal'));
+      ['br-cust', 'br-like'].forEach(id => { const f = $('#' + id); f.value.trim() && lines.push(`${f.dataset.q}: ${f.value.trim()}`); });
+      add('Features', ticked('feat'));
+      const pg = $('#br-pages'); pg.value.trim() && lines.push(`Pages: ${pg.value.trim()}`);
+      add('I already have', ticked('have'));
+      const u = $('#br-url'); u.value.trim() && lines.push(`Current site: ${u.value.trim()}`);
+      lines.push('', `Budget: ${$('#br-budget').value}`, `Timing: ${$('#br-when').value}`);
+      const n = $('#br-note'); n.value.trim() && lines.push('', n.value.trim());
+      return lines.join('\n');
+    };
+    const update = () => {
+      const msg = build(), biz = $('#br-biz').value.trim();
+      $('#br-wa').href = WA + '?text=' + encodeURIComponent(msg);
+      $('#br-mail').href = `mailto:${EMAIL}?subject=${encodeURIComponent('Project brief' + (biz ? ': ' + biz : ''))}&body=${encodeURIComponent(msg)}`;
+    };
+    bform.addEventListener('input', update); bform.addEventListener('change', update);
+    bform.addEventListener('submit', e => e.preventDefault());
+    $('#br-copy').addEventListener('click', async e => {
+      const b = e.currentTarget;
+      try { await navigator.clipboard.writeText(build()); b.textContent = 'Copied'; } catch (_) { b.textContent = 'Copy failed'; }
+      setTimeout(() => { b.textContent = 'Copy answers'; }, 1800);
+    });
+    update();
+  }
+
 })();
