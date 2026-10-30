@@ -1225,3 +1225,10 @@ img.rv-av{object-fit:cover;background:#fff;border:1px solid var(--line)}
 /* ---------- three-card tier rows (branding, 3D) ---------- */
 .tiers.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media (max-width:900px){.tiers.three{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- estimator: popular options first, the rest behind "More options" ---------- */
+.adds:not(.open) .switch.more:not(:has(input:checked)){display:none}
+.more-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:10px 16px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink);font:inherit;font-size:14.5px;font-weight:650;cursor:pointer}
+.more-btn:hover{border-color:var(--ink-3)}.more-btn b{font-weight:650;color:var(--ink-3)}
+.more-btn[hidden]{display:none}
+.adds-note{margin-top:10px;font-size:13.5px;color:var(--ink-3)}

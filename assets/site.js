@@ -378,6 +378,7 @@
         const sw = cb.closest('.switch');
         const show = sw.dataset.for.split(' ').includes(kind);
         sw.hidden = !show;
+        sw.classList.toggle('more', !(sw.dataset.pop || '').split(' ').includes(kind));
         if (!show) cb.checked = false;
       });
       curBase = base;
@@ -457,6 +458,11 @@
       if (careNote) careNote.textContent = q.careNote || '';
       fillLines(outLines, q.lines);
       wa.href = WA + '?text=' + encodeURIComponent(brief(q));
+      if (moreBtn) {
+        const rest = adds.filter(cb => { const w = cb.closest('.switch'); return !w.hidden && w.classList.contains('more') && !cb.checked; }).length;
+        moreN.textContent = rest && !addsBox.classList.contains('open') ? '(' + rest + ')' : '';
+        moreBtn.hidden = !rest && !addsBox.classList.contains('open');
+      }
     };
 
     /* put the estimator in a given state: used by ideas, shared links and the brief reader */
@@ -465,11 +471,26 @@
       if (!r) return;
       r.checked = true;
       setBase(s.b, s);
-      adds.forEach(cb => { if (!cb.closest('.switch').hidden && !cb.disabled) cb.checked = (s.a || []).includes(cb.dataset.key); });
+      const want = (s.a || []).includes('brandid') ? (s.a || []).filter(k => k !== 'brand') : (s.a || []);
+      adds.forEach(cb => { if (!cb.closest('.switch').hidden && !cb.disabled) cb.checked = want.includes(cb.dataset.key); });
       if (s.c != null) { const c = $('input[name="care"][value="' + s.c + '"]', est); if (c) c.checked = true; }
       render();
     };
 
+    const addsBox = $('#e-adds', est), moreBtn = $('#e-more', est), moreN = $('#e-more-n', est);
+    if (moreBtn) moreBtn.addEventListener('click', () => {
+      const open = addsBox.classList.toggle('open');
+      moreBtn.setAttribute('aria-expanded', open);
+      moreBtn.querySelector('span').textContent = open ? 'Fewer options' : 'More options';
+      render();
+    });
+    /* a logo starter and a full brand identity overlap: picking one clears the other */
+    est.addEventListener('change', e => {
+      const k = e.target.dataset && e.target.dataset.key;
+      if (!e.target.checked || (k !== 'brand' && k !== 'brandid')) return;
+      const other = adds.find(cb => cb.dataset.key === (k === 'brand' ? 'brandid' : 'brand'));
+      if (other && other.checked) { other.checked = false; render(); }
+    });
     est.addEventListener('input', render);
     est.addEventListener('change', render);
     est.addEventListener('submit', e => e.preventDefault());
