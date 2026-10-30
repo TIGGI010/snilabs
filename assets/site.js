@@ -513,7 +513,9 @@
       ['popia', /\b(popia|privacy policy|paia)\b/],
       ['sec', /\b(security|secure|cyber|hacked)\b/],
       ['lang', /\b(afrikaans|zulu|isizulu|xhosa|sotho|portuguese|french|bilingual|second language|two languages)\b/],
-      ['brand', /\b(logo|brand|branding)\b/],
+      ['brandid', /\b(brand identity|corporate identity|brand package|branding package|full brand|rebrand)\b/],
+      ['brand', /\b(logo|branding|brand(?! identity| package))\b/],
+      ['v3d', /\b(3d|3 d|three d|product viewer|visuali[sz]er|configurator|augmented reality|ar view)\b/],
       ['copy', /\b(copywriting|copy writing|write the (words|content|text)|content writing|you write)\b/],
     ];
     const read = raw => {
