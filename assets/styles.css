@@ -1232,3 +1232,18 @@ img.rv-av{object-fit:cover;background:#fff;border:1px solid var(--line)}
 .more-btn:hover{border-color:var(--ink-3)}.more-btn b{font-weight:650;color:var(--ink-3)}
 .more-btn[hidden]{display:none}
 .adds-note{margin-top:10px;font-size:13.5px;color:var(--ink-3)}
+
+/* ---------- pricing clean-up: packages fill the estimator, grouped build types, other services ---------- */
+#packages .tier.on{border-color:var(--blue);box-shadow:0 0 0 3px rgba(11,92,255,.16)}
+.pk-more{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:15px;color:var(--ink-2)}
+.pk-more .link{font-weight:650}
+.choices-k{margin:18px 0 10px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.choices.others .choice-body{padding:11px 14px}.choices.others .choice-body small{display:none}
+.osvcs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.5vw,18px)}
+@media (max-width:980px){.osvcs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.osvcs{grid-template-columns:minmax(0,1fr)}}
+.osvc{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:6px;padding:22px;border:1px solid var(--line);border-radius:22px;background:var(--card);text-decoration:none;color:var(--ink);transition:border-color .2s}
+.osvc:hover{border-color:var(--ink-3)}
+.osvc b{font-size:17px;font-weight:750;letter-spacing:-.02em}.osvc em{font-style:normal;font-weight:700;color:var(--blue);font-size:15px}
+.osvc span{font-size:14.5px;color:var(--ink-2);line-height:1.45}.osvc i{margin-top:auto;padding-top:8px;font-style:normal;font-weight:650;font-size:14.5px;display:inline-flex;align-items:center;gap:6px}
+.osvc i svg{width:15px;height:15px}

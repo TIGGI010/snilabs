@@ -319,7 +319,9 @@
   const est = $('#est');
   if (est) {
     const BOT_RUN = 450;
-    const WEB = ['landing', 'starter', 'business', 'advanced', 'update'];
+    const WEB = ['landing', 'starter', 'business', 'advanced', 'showcase', 'update'];
+    /* add-ons a build already includes: shown switched on, marked Included, not charged again */
+    const INCLUDED = { store: ['pay'], showcase: ['bot', 'v3d'] };
     const kindOf = b => WEB.includes(b) ? 'web' : (b === 'system' || b === 'mobile') ? 'app' : b;
     const P = n => ({ person: 'people', 'user type': 'user types' }[n] || n + 's');
     /* each build type has its own sliders: what they count, what is included, what each extra costs */
@@ -328,6 +330,7 @@
       starter: { weeks: 1, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 8, step: 1, value: 3, inc: 3, unit: 450, per: 1, noun: 'page' } },
       business: { weeks: 2, legend: 'How many pages?', r1: { label: 'Pages', min: 1, max: 15, step: 1, value: 6, inc: 8, unit: 450, per: 1, noun: 'page' } },
       advanced: { weeks: 4, legend: 'How many pages?', r1: { label: 'Pages', min: 10, max: 40, step: 1, value: 16, inc: 20, unit: 450, per: 1, noun: 'page' } },
+      showcase: { weeks: 6, legend: 'How many pages?', r1: { label: 'Pages', min: 5, max: 40, step: 1, value: 12, inc: 20, unit: 450, per: 1, noun: 'page' } },
       store: { weeks: 2, legend: 'How big is the shop?',
         r1: { label: 'Products to load', min: 0, max: 1000, step: 10, value: 20, inc: 20, unit: 200, per: 10, noun: 'product' },
         r2: { label: 'Pages besides the shop', min: 1, max: 15, step: 1, value: 6, inc: 8, unit: 450, per: 1, noun: 'page' } },
@@ -401,22 +404,21 @@
         lines.push([num(over) + ' extra ' + (over === 1 ? c.noun : P(c.noun)), '+' + fmt(cost)]);
       });
       const picked = [];
+      const incl = INCLUDED[base] || [];
       adds.forEach(cb => {
-        if (cb.dataset.key === 'pay') {
-          const tag = cb.closest('.switch').querySelector('.add');
-          if (store) {
-            if (!cb.disabled) cb.dataset.prev = cb.checked ? '1' : '';
-            cb.checked = true; cb.disabled = true;
-            if (tag) tag.textContent = 'Included';
-          } else if (cb.disabled) {
-            cb.disabled = false; cb.checked = cb.dataset.prev === '1';
-            if (tag) tag.textContent = '+' + fmt(+cb.dataset.add);
-          }
+        const tag = cb.closest('.switch').querySelector('.add'), inc = incl.includes(cb.dataset.key);
+        if (inc) {
+          if (!cb.disabled) cb.dataset.prev = cb.checked ? '1' : '';
+          cb.checked = true; cb.disabled = true;
+          if (tag) tag.textContent = 'Included';
+        } else if (cb.disabled) {
+          cb.disabled = false; cb.checked = cb.dataset.prev === '1';
+          if (tag) tag.textContent = '+' + fmt(+cb.dataset.add);
         }
         if (!cb.checked || cb.closest('.switch').hidden) return;
         picked.push(cb.dataset.label);
-        if (cb.dataset.key === 'pay' && store) { lines.push([cb.dataset.label, 'Included']); return; }
         if (cb.dataset.key === 'bot') run += BOT_RUN;
+        if (inc) { lines.push([cb.dataset.label, 'Included']); return; }
         const a = +cb.dataset.add; lo += a; hi += a; addTotal += a;
         lines.push([cb.dataset.label, '+' + fmt(a)]);
       });
@@ -552,6 +554,7 @@
       const site = has(/\b(website|site|webpage|web page|landing page|pages?)\b/);
       if (has(/\b(update|updating|redesign|redo|refresh|revamp|fix|fixing|improve|existing|current (site|website)|old (site|website)|make changes)\b/) &&
           !has(/\bnew (website|site|store|shop)\b/) && site) p.base = 'update';
+      else if (has(/\b(visuali[sz]er|configurator|3d showcase|showcase website)\b/)) p.base = 'showcase';
       else if (has(/\b(online store|store|shop|webshop|e ?commerce|sell (products|online|my products|stock)|checkout|cart)\b/) || (has(/\b(sell|selling|sells)\b/) && has(/\bonline\b/)) || p.products) p.base = 'store';
       else if (has(/\b(mobile app|phone app|android|ios|iphone|play store|app store)\b/)) p.base = 'mobile';
       else if (!site && has(/\b(booking|bookings|book online|appointments?|reservations?|job cards?|job track\w*|portal|system|app|apps|application|crm|inventory|stock control|web app)\b/)) p.base = 'system';
@@ -621,6 +624,18 @@
     }
     /* "What each add-on includes" opens its drop-down */
     $$('a[href="#features"]').forEach(a => a.addEventListener('click', () => { const d = $('#features details'); if (d) d.open = true; }));
+    /* package cards above the estimator: one tap fills it in for that package */
+    $$('[data-est]').forEach(a => a.addEventListener('click', e => {
+      let st;
+      try { st = JSON.parse(a.dataset.est); } catch (err) { return; }
+      e.preventDefault();
+      $$('#packages .tier').forEach(t => t.classList.toggle('on', t.contains(a)));
+      $$('.idea', $('#e-ideas')).forEach(x => x.classList.remove('on'));
+      if (briefBox) briefBox.value = '';
+      showFound([], '');
+      apply(Object.assign({ c: +$('input[name="care"]:checked', est).value }, st));
+      scrollToEst();
+    }));
     /* ideas: one tap sets the build, the sliders and the add-ons */
     $$('.idea', $('#e-ideas')).forEach(btn => btn.addEventListener('click', () => {
       let idea;
