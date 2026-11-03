@@ -789,7 +789,7 @@
     new MutationObserver(sync).observe(total, { childList: true, characterData: true, subtree: true });
     sync();
     let formIn = false, outIn = false;
-    const show = () => pill.classList.toggle('show', formIn && !outIn);
+    const show = () => { const on = formIn && !outIn; pill.classList.toggle('show', on); document.body.classList.toggle('pill-on', on && getComputedStyle(pill).display !== 'none'); };
     new IntersectionObserver(es => es.forEach(e => { if (e.target === form) formIn = e.isIntersecting; else outIn = e.isIntersecting; show(); }), { threshold: 0 })
       .observe(form);
     new IntersectionObserver(es => es.forEach(e => { outIn = e.isIntersecting; show(); }), { threshold: 0.25 }).observe(out);

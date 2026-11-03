@@ -1247,3 +1247,13 @@ img.rv-av{object-fit:cover;background:#fff;border:1px solid var(--line)}
 .osvc b{font-size:17px;font-weight:750;letter-spacing:-.02em}.osvc em{font-style:normal;font-weight:700;color:var(--blue);font-size:15px}
 .osvc span{font-size:14.5px;color:var(--ink-2);line-height:1.45}.osvc i{margin-top:auto;padding-top:8px;font-style:normal;font-weight:650;font-size:14.5px;display:inline-flex;align-items:center;gap:6px}
 .osvc i svg{width:15px;height:15px}
+
+/* floating WhatsApp button */
+.wa-fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:58;display:inline-flex;align-items:center;gap:10px;height:56px;padding:0 22px 0 16px;border-radius:999px;background:#25D366;color:#fff;font-weight:750;font-size:15px;letter-spacing:-.01em;text-decoration:none;box-shadow:0 12px 30px -10px rgba(0,0,0,.45);transition:transform .3s var(--ease),bottom .4s var(--ease),box-shadow .3s}
+.wa-fab svg{width:28px;height:28px;flex:none}
+.wa-fab:hover{transform:translateY(-2px);box-shadow:0 16px 34px -10px rgba(0,0,0,.5)}
+.wa-fab:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (max-width:700px){.wa-fab{width:56px;padding:0;justify-content:center}.wa-fab span{display:none}}
+body.pill-on .wa-fab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+@media print{.wa-fab{display:none}}
+body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-events:none}
