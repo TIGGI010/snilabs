@@ -1257,3 +1257,21 @@ img.rv-av{object-fit:cover;background:#fff;border:1px solid var(--line)}
 body.pill-on .wa-fab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 @media print{.wa-fab{display:none}}
 body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-events:none}
+/* blog: thumbnails, cover, tables, FAQ, author */
+.post-card.has-img{padding-top:0;overflow:hidden}
+.post-thumb{display:block;width:calc(100% + 2*clamp(22px,2.6vw,32px));max-width:none;margin:0 calc(-1*clamp(22px,2.6vw,32px)) 6px;aspect-ratio:1200/630;height:auto;object-fit:cover;border-bottom:1px solid var(--line)}
+.post-figure{margin:0 0 clamp(24px,3vw,40px)}
+.post-figure img{display:block;width:100%;height:auto;aspect-ratio:1200/630;border-radius:20px;border:1px solid var(--line)}
+.post-table{margin:8px 0 26px;overflow-x:auto;border:1px solid var(--line);border-radius:16px;-webkit-overflow-scrolling:touch}
+.post-table table{width:100%;min-width:520px;border-collapse:collapse;font-size:15px}
+.post-table th{text-align:left;padding:12px 14px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);background:var(--bg-2);border-bottom:1px solid var(--line)}
+.post-table td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2);line-height:1.5}
+.post-table tr:last-child td{border-bottom:0}
+.post-table td:first-child{color:var(--ink);font-weight:700}
+.post-faq{margin-top:clamp(36px,5vw,56px)}
+.post-faq h2{margin:0 0 6px;font-size:clamp(24px,2.6vw,32px);font-weight:800;letter-spacing:-.04em}
+.post-faq .ans p{font-size:16px;line-height:1.7;color:var(--ink-2);margin:0 0 20px}
+.author-box{display:flex;gap:18px;align-items:flex-start;margin-top:clamp(32px,4vw,48px);padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--bg-2)}
+.author-av{flex:none;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.author-box b{display:block;font-size:17px;font-weight:800;letter-spacing:-.02em}
+.author-box span{display:block;margin:4px 0 10px;font-size:15px;line-height:1.6;color:var(--ink-2)}
