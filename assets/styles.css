@@ -1275,3 +1275,9 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .author-av{flex:none;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:800;font-size:18px;letter-spacing:-.02em}
 .author-box b{display:block;font-size:17px;font-weight:800;letter-spacing:-.02em}
 .author-box span{display:block;margin:4px 0 10px;font-size:15px;line-height:1.6;color:var(--ink-2)}
+/* pricing: jump nav */
+.jump{position:sticky;top:var(--header,64px);z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-bottom:clamp(20px,3vw,36px)}
+.jump-row{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.jump-row::-webkit-scrollbar{display:none}
+.jump-row a{flex:none;padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:700;color:var(--ink-2);text-decoration:none;background:var(--card)}
+.jump-row a:hover{color:var(--ink);border-color:var(--ink-3)}
