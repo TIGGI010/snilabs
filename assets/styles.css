@@ -1382,3 +1382,6 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .cmdk-ask span{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .cmdk-ask small{margin-left:auto;flex:none;font-size:12px;font-weight:800;color:var(--blue)}
 .cmdk-ask svg{color:var(--blue)}
+
+.bview.shot{padding:0;background:#fff}
+.bview.shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
