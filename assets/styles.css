@@ -1319,3 +1319,10 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .store small{font-size:11px;font-weight:650;opacity:.72}
 .store b{font-size:13.5px;font-weight:750}
 .proj-hero .stores{margin-top:18px}
+.web-icon svg{display:block;width:100%;height:100%}
+.app-tag{margin:2px 0 6px;font-size:14px;font-weight:650;color:var(--ink)}
+.wm-bubblemap,.wm-onelet{text-transform:lowercase;letter-spacing:-.05em}
+.wm-bubblemap span,.wm-onelet span{font-weight:500;color:var(--ink-3)}
+.wm-reporadar span{color:#2D7FF9}
+.wm-canimport span{color:#0B5CFF}
+.web-icon{border-radius:26%;box-shadow:0 0 0 1px var(--line)}.wt-ic.wapp svg{box-shadow:0 0 0 1px var(--line)}
