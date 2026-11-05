@@ -1310,3 +1310,5 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .wt-go{margin-left:auto;color:var(--ink-3)}
 .case,.app-lg{scroll-margin-top:calc(var(--header,64px) + 24px)}
 .case:target,.app-lg:target{box-shadow:0 0 0 2px var(--blue);transition:box-shadow .4s}
+.sa-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.01em;color:inherit;background:color-mix(in srgb,currentColor 10%,transparent);border:1px solid color-mix(in srgb,currentColor 18%,transparent)}
+.proj-top{flex-wrap:wrap;row-gap:12px}
