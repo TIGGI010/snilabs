@@ -1281,3 +1281,5 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .jump-row::-webkit-scrollbar{display:none}
 .jump-row a{flex:none;padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:700;color:var(--ink-2);text-decoration:none;background:var(--card)}
 .jump-row a:hover{color:var(--ink);border-color:var(--ink-3)}
+
+.case-logo{display:inline-flex;align-self:flex-start;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 14px}.case-logo img{height:56px;width:auto;display:block}
