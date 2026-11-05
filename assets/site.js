@@ -133,8 +133,15 @@
   const dlg = $('#cmdk');
   if (dlg && typeof dlg.showModal === 'function') {
     const input = $('input', dlg);
+    /* a typed request ("make an app in the web") goes straight into the estimator */
+    const ask = document.createElement('button');
+    ask.type = 'button'; ask.className = 'cmdk-item cmdk-ask'; ask.setAttribute('role', 'option'); ask.setAttribute('aria-selected', 'false');
+    ask.dataset.action = 'estimate'; ask.hidden = true;
+    ask.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9Z"/></svg><span></span><small>Price it</small>';
+    $('.cmdk-list', dlg).prepend(ask);
     const items = $$('.cmdk-item', dlg);
     const empty = $('.cmdk-empty', dlg);
+    const NEED = /\b(app|apps|website|site|web|store|shop|system|booking|bot|chatbot|automation|dashboard|logo|brand|landing|portal|build|make|need|want|create)\b/;
     let active = 0;
     const visible = () => items.filter(i => !i.hidden);
     const setActive = n => {
@@ -147,8 +154,11 @@
     };
     const filter = () => {
       const q = input.value.trim().toLowerCase();
-      items.forEach(i => { i.hidden = !!q && !(i.textContent + ' ' + (i.dataset.k || '')).toLowerCase().includes(q); });
+      items.forEach(i => { if (i !== ask) i.hidden = !!q && !(i.textContent + ' ' + (i.dataset.k || '')).toLowerCase().includes(q); });
       $$('.cmdk-sep', dlg).forEach(s => { s.hidden = !!q; });
+      const others = items.some(i => i !== ask && !i.hidden);
+      ask.hidden = !q || !dlg.dataset.est || (others && !(q.includes(' ') && NEED.test(q)));
+      if (!ask.hidden) $('span', ask).textContent = 'Estimate “' + input.value.trim() + '”';
       empty.hidden = visible().length > 0;
       setActive(0);
     };
@@ -158,6 +168,16 @@
       dlg.close();
       if (act === 'theme') toggleTheme(null);
       else if (act === 'copy-phone') copy(PHONE, 'Number copied');
+      else if (act === 'estimate') {
+        const said = input.value.trim(), target = dlg.dataset.est;
+        let saved = false;
+        try { sessionStorage.setItem('startline-brief', said); saved = true; } catch (e) {}
+        const url = saved ? target : target.replace('#', '?brief=' + encodeURIComponent(said) + '#');
+        if (location.pathname === new URL(url, location.href).pathname && $('#e-brief')) {
+          try { sessionStorage.removeItem('startline-brief'); } catch (e) {}
+          $('#e-brief').value = said; $('#e-parse').click();
+        } else location.href = url;
+      }
       else if (href) go(href, el.hasAttribute('data-ext'));
     };
     const open = () => {
@@ -556,7 +576,9 @@
           !has(/\bnew (website|site|store|shop)\b/) && site) p.base = 'update';
       else if (has(/\b(visuali[sz]er|configurator|3d showcase|showcase website)\b/)) p.base = 'showcase';
       else if (has(/\b(online store|store|shop|webshop|e ?commerce|sell (products|online|my products|stock)|checkout|cart)\b/) || (has(/\b(sell|selling|sells)\b/) && has(/\bonline\b/)) || p.products) p.base = 'store';
-      else if (has(/\b(mobile app|phone app|android|ios|iphone|play store|app store)\b/)) p.base = 'mobile';
+      else if (has(/\b(mobile app|phone app|cell ?phone app|smartphone app|native app|android|ios|iphone|ipad|play store|app store|apple store)\b/) ||
+               has(/\bapp (for|on|in) (the |my |a |our |their )?(phone|phones|cell ?phone|mobile|smartphones?)\b/)) p.base = 'mobile';
+      else if (has(/\b(web ?app|web ?based app|web application|online app|browser app|app (in|on|for|through|via) (the |a )?(web|browser|internet|online)|app online|apps online|cloud app|saas|software)\b/)) p.base = 'system';
       else if (!site && has(/\b(booking|bookings|book online|appointments?|reservations?|job cards?|job track\w*|portal|system|app|apps|application|crm|inventory|stock control|web app)\b/)) p.base = 'system';
       else if (!site && AI.test(t)) p.base = 'ai';
       else if (!site && has(/\b(dashboards?|reports?|analytics|power bi|data)\b/)) p.base = 'ai';
@@ -653,7 +675,7 @@
     if (!incoming) { try { incoming = new URLSearchParams(location.search).get('brief') || ''; } catch (e) {} }
     if (shared) {
       if (shared.say && briefBox) briefBox.value = shared.say;
-      apply(Object.assign({ c: 0 }, shared));
+      apply(Object.assign({ c: 550 }, shared));
       if (shared.say) showFound(summary(), shared.say);
       setTimeout(() => $('#estimate').scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
     } else if (incoming && briefBox) {
@@ -794,6 +816,31 @@
       .observe(form);
     new IntersectionObserver(es => es.forEach(e => { outIn = e.isIntersecting; show(); }), { threshold: 0.25 }).observe(out);
     pill.addEventListener('click', () => out.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' }));
+  });
+
+  /* ---------- launch list: save an email for app launch updates ---------- */
+  $$('form[data-signup]').forEach(f => {
+    const status = $('.su-status', f), btn = $('button[type="submit"]', f), email = $('input[name="email"]', f);
+    const say = (msg, ok) => { status.className = 'su-status ' + (ok ? 'su-ok' : 'su-err'); status.textContent = msg; };
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const v = email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { say('Please check your email address.', false); email.focus(); return; }
+      const data = Object.fromEntries(new FormData(f));
+      data.page = location.pathname;
+      btn.disabled = true;
+      try {
+        const r = await fetch(f.action, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || 'failed');
+        f.classList.add('done');
+        say(j.already ? 'You are already on the list. We will be in touch.' : 'You are on the list. We will email you at launch.', true);
+      } catch (err) {
+        btn.disabled = false;
+        status.className = 'su-status su-err';
+        status.innerHTML = 'That did not save. <a href="mailto:' + EMAIL + '?subject=' + encodeURIComponent('Launch list: ' + (data.app || 'apps')) + '&body=' + encodeURIComponent('Please add ' + v + ' to the launch list.') + '">Email us instead</a> and we will add you.';
+      }
+    });
   });
 
   /* ---------- home prompt bar: carry the description to the estimator ---------- */
