@@ -1344,3 +1344,7 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 @media (prefers-reduced-motion:reduce){.rt-dot{display:none}}
 .rt-cap{bottom:auto;top:0;left:0}
 .wm-onelet span{color:#D9971A}
+.wtabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.wtabs label{font-size:13.5px;white-space:nowrap}
+.wpick:has(input[value="web"]:checked) .wgrid[data-g="web"]{display:flex}
+@media (max-width:420px){.wtabs label{font-size:12.5px;padding:10px 2px}}
