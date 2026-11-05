@@ -1326,3 +1326,4 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .wm-reporadar span{color:#2D7FF9}
 .wm-canimport span{color:#0B5CFF}
 .web-icon{border-radius:26%;box-shadow:0 0 0 1px var(--line)}.wt-ic.wapp svg{box-shadow:0 0 0 1px var(--line)}
+.stores.sm{gap:6px;margin-top:10px}.stores.sm .store{padding:5px 10px 5px 8px;border-radius:11px;gap:7px}.stores.sm .store>svg{width:12px;height:18px}.stores.sm small{font-size:10px}.stores.sm b{font-size:12px}
