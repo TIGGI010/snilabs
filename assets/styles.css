@@ -1343,3 +1343,4 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 @keyframes rt-draw{0%{stroke-dashoffset:1}60%,100%{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.rt-dot{display:none}}
 .rt-cap{bottom:auto;top:0;left:0}
+.wm-onelet span{color:#D9971A}
