@@ -1226,75 +1226,102 @@
   }
 
 
-  /* ---------- Startline Engine: a year of data flowing into nine models ---------- */
+  /* ---------- Startline Engine: a year of data → nine models → five outputs ---------- */
   const fl = $('#eng-flow');
   if (fl) {
-    const cv = $('canvas', fl), ctx = cv.getContext('2d'), sel = $('.flow-sel', fl), MODELS = JSON.parse(fl.dataset.models);
-    const SHORT = { 'Athlete model': 'Athlete', 'Pace model': 'Pace', 'Load model': 'Load', 'Readiness model': 'Readiness', 'Metres per heartbeat': 'm/beat', 'Durability and climbing': 'Durability', 'Plan model': 'Plan', 'Race model': 'Race', 'Consistency model': 'Consistency' };
+    const cv = $('canvas', fl), ctx = cv.getContext('2d'), sel = $('.flow-sel', fl), leg = $('.flow-legend', fl), MODELS = JSON.parse(fl.dataset.models);
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let W = 0, H = 0, dpr = 1, dots = [], bins = [], hot = -1, shown = 0, raf = 0, started = false;
-    const rnd = (a => () => (a = (a * 16807) % 2147483647) / 2147483647)(20261109);
-    const layout = () => {
-      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1);
-      W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
-      const n = W < 600 ? 1500 : 2920, pad = W < 600 ? 10 : 24, gap = W < 600 ? 3 : 6, total = MODELS.reduce((a, m) => a + Math.max(m.k, 2.5), 0);
-      const usable = W - pad * 2 - gap * (MODELS.length - 1);
-      let x = pad; bins = MODELS.map(m => { const w = usable * Math.max(m.k, 2.5) / total, b = { x, w, m }; x += w + gap; return b; });
-      const topA = H * .05, topB = H * .36, by = H - (W < 600 ? 74 : 86);
-      const r2 = (a => () => (a = (a * 16807) % 2147483647) / 2147483647)(1109);
-      const pick = () => { let t = r2() * total; for (let i = 0; i < bins.length; i++) { t -= Math.max(MODELS[i].k, 2.5); if (t <= 0) return i; } return bins.length - 1; };
-      dots = Array.from({ length: n }, () => {
-        const i = pick(), b = bins[i], x0 = pad + r2() * (W - pad * 2), y0 = topA + r2() * (topB - topA);
-        return { x0, y0, x1: b.x + 2 + r2() * (b.w - 4), y1: by, i, tw: r2() * 6.28 };
-      });
-      bins.forEach(b => { b.y = by; });
+    const SHORT = ['Athlete', 'Pace', 'Load', 'Readiness', 'm/beat', 'Durability', 'Plan', 'Race', 'Consistency'];
+    // sources: name, colour, points a year, the models they feed (by index)
+    const SRC = [
+      ['Sessions', '#3DDC8A', 300, [0, 1, 2, 4, 5, 6, 8]], ['HRV', '#4DD6FF', 365, [3]], ['Resting HR', '#7A9CFF', 365, [3, 2]],
+      ['Sleep', '#A98BFF', 365, [3, 8]], ['Check-ins', '#FF8FB8', 365, [3, 8]], ['Races', '#FFD60A', 12, [6, 7, 1]], ['Strength and food', '#FFA552', 1148, [2, 7, 8]]];
+    const OUT = ['Periodised plan', 'Paces and zones', 'Readiness score', 'Load and form', 'Race plan and fuel'];
+    const M2O = [[0, 1, 4], [1, 4, 0], [3, 2, 0], [2, 0], [3, 1], [4, 0], [0], [4], [0, 2]];
+    let W, H, dpr, small, dots = [], links = [], mb = [], ob = [], shown = 0, started = false, hot = null;
+    const R = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
+    leg.innerHTML = SRC.map(([n, c, k], i) => `<button type="button" data-s="${i}"><i style="background:${c}"></i>${n}<small>${k.toLocaleString('en-ZA')}</small></button>`).join('');
+    const lay = () => {
+      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; small = W < 640;
+      const pad = small ? 10 : 26, gap = small ? 3 : 7, rnd = R(20261109);
+      const wsum = MODELS.reduce((a, m) => a + Math.max(m.k, 2.5), 0), usable = W - pad * 2 - gap * 8;
+      let x = pad; const my = H * .5;
+      mb = MODELS.map((m, i) => { const w = usable * Math.max(m.k, 2.5) / wsum, b = { x, w, y: my, i }; x += w + gap; return b; });
+      const ow = (W - pad * 2 - (small ? 4 : 14) * 4) / 5, oy = H * (small ? .86 : .84);
+      ob = OUT.map((n, i) => ({ x: pad + i * (ow + (small ? 4 : 14)), w: ow, y: oy, i }));
+      const n = small ? 1500 : 2920, tot = SRC.reduce((a, s) => a + s[2], 0);
+      dots = [];
+      SRC.forEach((s, si) => { const c = Math.max(6, Math.round(n * s[2] / tot)); for (let k = 0; k < c; k++) {
+        const mi = s[3][Math.floor(rnd() * s[3].length)], b = mb[mi];
+        dots.push({ x0: pad + rnd() * (W - pad * 2), y0: H * .02 + rnd() * H * .17, x1: b.x + 2 + rnd() * (b.w - 4), y1: b.y, s: si, m: mi, tw: rnd() * 6.28 }); } });
+      dots.sort(() => rnd() - .5);
+      const cnt = mb.map((b, i) => dots.filter(d => d.m === i).length);
+      links = [];
+      mb.forEach((b, i) => { const per = Math.max(30, Math.round(cnt[i] / (small ? 3 : 2.2))); for (let k = 0; k < per; k++) {
+        const oi = M2O[i][Math.floor(rnd() * M2O[i].length)], o = ob[oi];
+        links.push({ x0: b.x + 2 + rnd() * (b.w - 4), y0: b.y + (small ? 14 : 20), x1: o.x + 2 + rnd() * (o.w - 4), y1: o.y, m: i, o: oi }); } });
     };
+    const isOn = (kind, d) => {
+      if (!hot) return true;
+      if (hot.t === 's') return kind === 'd' ? d.s === hot.i : SRC[hot.i][3].includes(d.m);
+      if (hot.t === 'm') return d.m === hot.i;
+      if (hot.t === 'o') return kind === 'l' ? d.o === hot.i : M2O[d.m].includes(hot.i);
+    };
+    const curve = (a, b, c, d, k) => { const m = b + (d - b) * .5; ctx.beginPath(); ctx.moveTo(a, b); ctx.bezierCurveTo(a, m, c, d - (d - b) * k, c, d); ctx.stroke(); };
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
     const draw = t => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = W < 600 ? .5 : .6;
-      const lim = Math.floor(shown);
-      for (let k = 0; k < lim; k++) {
-        const d = dots[k], on = hot < 0 || d.i === hot;
-        ctx.strokeStyle = on ? (hot < 0 ? 'rgba(61,220,138,.11)' : 'rgba(61,220,138,.34)') : 'rgba(61,220,138,.012)';
-        const my = d.y0 + (d.y1 - d.y0) * .5;
-        ctx.beginPath(); ctx.moveTo(d.x0, d.y0); ctx.bezierCurveTo(d.x0, my, d.x1, d.y1 - (d.y1 - d.y0) * .42, d.x1, d.y1); ctx.stroke();
-      }
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = small ? .5 : .6;
+      const lim = Math.floor(shown), base = hot ? .02 : .1;
+      for (let k = 0; k < Math.min(lim, dots.length); k++) { const d = dots[k], on = isOn('d', d); ctx.strokeStyle = rgba(SRC[d.s][1], on ? (hot ? .34 : base) : .012); curve(d.x0, d.y0, d.x1, d.y1, .42); }
+      const ll = Math.floor(links.length * Math.min(1, lim / dots.length));
+      for (let k = 0; k < ll; k++) { const l = links[k], on = isOn('l', l); ctx.strokeStyle = on ? (hot ? 'rgba(235,255,244,.3)' : 'rgba(235,255,244,.09)') : 'rgba(235,255,244,.012)'; curve(l.x0, l.y0, l.x1, l.y1, .4); }
       ctx.globalCompositeOperation = 'source-over';
-      for (let k = 0; k < dots.length; k++) {
-        const d = dots[k], a = still ? .7 : .45 + .4 * Math.sin(t / 900 + d.tw);
-        ctx.fillStyle = (hot < 0 || d.i === hot) ? `rgba(235,255,244,${a})` : 'rgba(235,255,244,.12)';
-        ctx.fillRect(d.x0 - .7, d.y0 - .7, 1.4, 1.4);
-      }
-      const small = W < 600;
-      bins.forEach((b, i) => {
-        ctx.fillStyle = hot < 0 || hot === i ? '#3DDC8A' : 'rgba(61,220,138,.25)';
-        ctx.fillRect(b.x, b.y, b.w, small ? 14 : 22);
-        ctx.fillStyle = 'rgba(235,255,244,.75)'; ctx.font = `600 ${small ? 9 : 12}px ui-monospace,Menlo,Consolas,monospace`; ctx.textAlign = 'center';
-        ctx.fillText(String(b.m.k), b.x + b.w / 2, b.y - 8);
-        ctx.fillStyle = hot === i ? '#fff' : 'rgba(235,255,244,.9)'; ctx.font = `700 ${small ? 9 : 13}px Montserrat,system-ui,sans-serif`;
-        const label = SHORT[b.m.n] || b.m.n;
-        ctx.fillText(small ? String(i + 1).padStart(2, '0') : label, b.x + b.w / 2, b.y + (small ? 30 : 44 + (b.w < 70 && i % 2 ? 16 : 0)));
+      for (const d of dots) { const on = isOn('d', d), a = still ? .8 : .5 + .4 * Math.sin(t / 900 + d.tw); ctx.fillStyle = rgba(SRC[d.s][1], on ? a : .1); ctx.fillRect(d.x0 - .8, d.y0 - .8, 1.6, 1.6); }
+      const bh = small ? 14 : 20;
+      ctx.textAlign = 'center';
+      mb.forEach((b, i) => {
+        const on = !hot || (hot.t === 'm' && hot.i === i) || (hot.t === 's' && SRC[hot.i][3].includes(i)) || (hot.t === 'o' && M2O[i].includes(hot.i));
+        ctx.fillStyle = on ? '#3DDC8A' : 'rgba(61,220,138,.22)'; ctx.fillRect(b.x, b.y, b.w, bh);
+        ctx.fillStyle = 'rgba(235,255,244,.7)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.fillText(MODELS[i].k + (small ? '' : MODELS[i].k === 1 ? ' study' : ' studies'), b.x + b.w / 2, b.y - 8);
+        ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9 : 12.5}px Montserrat,system-ui,sans-serif`;
+        ctx.fillText(small ? String(i + 1).padStart(2, '0') : SHORT[i], b.x + b.w / 2, b.y + bh + (small ? 13 : 18) + (!small && b.w < 74 && i % 2 ? 15 : 0));
       });
+      ob.forEach((o, i) => {
+        const on = !hot || (hot.t === 'o' && hot.i === i) || (hot.t === 'm' && M2O[hot.i].includes(i)) || (hot.t === 's' && SRC[hot.i][3].some(m => M2O[m].includes(i)));
+        ctx.fillStyle = on ? '#EBFFF4' : 'rgba(235,255,244,.18)'; ctx.fillRect(o.x, o.y, o.w, bh);
+        ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9.5 : 13}px Montserrat,system-ui,sans-serif`;
+        const words = OUT[i].split(' ');
+        if (small) { ctx.fillText(words[0], o.x + o.w / 2, o.y + bh + 13); if (words.length > 1) ctx.fillText(words.slice(1).join(' '), o.x + o.w / 2, o.y + bh + 25); }
+        else ctx.fillText(OUT[i], o.x + o.w / 2, o.y + bh + 20);
+      });
+      ctx.fillStyle = 'rgba(143,185,163,.9)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.textAlign = 'left';
+      ctx.fillText('DATA', small ? 10 : 26, H * .215 + 12); ctx.fillText('MODELS', small ? 10 : 26, H * .5 - (small ? 22 : 30)); ctx.fillText('OUTPUTS', small ? 10 : 26, ob[0].y - (small ? 10 : 14));
     };
-    const loop = t => {
-      if (shown < dots.length) shown = Math.min(dots.length, shown + dots.length / 150);
-      draw(t);
-      raf = still ? 0 : requestAnimationFrame(loop);
+    const loop = t => { if (shown < dots.length) shown = Math.min(dots.length, shown + dots.length / 160); draw(t); if (!still) requestAnimationFrame(loop); };
+    const start = () => { if (started) return; started = true; lay(); shown = still ? dots.length : 0; still ? draw(0) : requestAnimationFrame(loop); };
+    new IntersectionObserver(es => { if (es[0].isIntersecting) start(); }, { threshold: .12 }).observe(fl);
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (started) { lay(); if (still) draw(0); } }, 150); });
+    const say = () => {
+      $$('button', leg).forEach(b => b.classList.toggle('on', !!hot && hot.t === 's' && +b.dataset.s === hot.i));
+      if (!hot) { sel.textContent = 'Tap a source, a model or an output to follow its path.'; return; }
+      if (hot.t === 's') { const s = SRC[hot.i]; sel.innerHTML = `<b>${s[0]}</b> · ${s[2].toLocaleString('en-ZA')} points a year, feeding ${s[3].map(i => SHORT[i]).join(', ')}`; }
+      if (hot.t === 'm') { const m = MODELS[hot.i]; sel.innerHTML = `<b>${String(hot.i + 1).padStart(2, '0')} ${m.n}</b> · ${m.s.join(' · ')}`; }
+      if (hot.t === 'o') { sel.innerHTML = `<b>${OUT[hot.i]}</b> · built from ${mb.filter((b, i) => M2O[i].includes(hot.i)).map(b => SHORT[b.i]).join(', ')}`; }
     };
-    const start = () => { if (started) return; started = true; layout(); shown = still ? dots.length : 0; if (still) draw(0); else raf = requestAnimationFrame(loop); };
-    new IntersectionObserver(es => { if (es[0].isIntersecting) start(); }, { threshold: .15 }).observe(fl);
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (started) { layout(); if (still) draw(0); } }, 150); });
-    const pickBin = e => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; if (y < H * .45) return -1; return bins.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); };
-    const setHot = i => {
-      if (i === hot) return; hot = i; if (still) draw(0);
-      if (i < 0) { sel.textContent = 'Tap a model to see the research behind it.'; return; }
-      const m = MODELS[i]; sel.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + ' ' + m.n + '</b> · ' + m.s.join(' · ');
+    const setHot = h => { if (JSON.stringify(h) === JSON.stringify(hot)) return; hot = h; say(); if (still) draw(0); };
+    const pick = e => {
+      const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      if (y > H * .4 && y < H * .72) { const i = mb.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); return i < 0 ? null : { t: 'm', i }; }
+      if (y > H * .76) { const i = ob.findIndex(b => x >= b.x && x <= b.x + b.w); return i < 0 ? null : { t: 'o', i }; }
+      if (y < H * .24) { const d = dots.reduce((best, d) => { const q = (d.x0 - x) ** 2 + (d.y0 - y) ** 2; return q < best[0] ? [q, d] : best; }, [1e9, null]); return d[1] && d[0] < 400 ? { t: 's', i: d[1].s } : null; }
+      return null;
     };
-    cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') setHot(pickBin(e)); });
-    cv.addEventListener('pointerleave', () => setHot(-1));
-    cv.addEventListener('click', e => { const i = pickBin(e); setHot(i === hot ? -1 : i); });
+    cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') setHot(pick(e)); });
+    cv.addEventListener('pointerleave', () => setHot(null));
+    cv.addEventListener('click', e => { const h = pick(e); setHot(h && hot && h.t === hot.t && h.i === hot.i ? null : h); });
+    leg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.s; setHot(hot && hot.t === 's' && hot.i === i ? null : { t: 's', i }); });
   }
-
 
   /* ---------- Startline Engine hero: data flowing into a 16-week block ---------- */
   const hf = $('#eng-hflow');
