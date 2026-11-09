@@ -317,7 +317,8 @@
 
   /* ---------- the send form: fills itself from an estimate or app plan ---------- */
   const sendDlg = $('#sendform');
-  const openSend = (text, title) => {
+  const openSend = (text, title, opt) => {
+    opt = opt || {};
     if (!sendDlg) { location.href = WA + '?text=' + encodeURIComponent(text); return; }
     const msg = $('#sf-msg'), name = $('#sf-name'), biz = $('#sf-biz'), phone = $('#sf-phone'), email = $('#sf-email');
     $('#sf-title').firstChild.textContent = title;
@@ -327,13 +328,28 @@
       const contact = [phone.value.trim() && 'Phone: ' + phone.value.trim(), email.value.trim() && 'Email: ' + email.value.trim()].filter(Boolean).join('\n');
       const body = head + (contact ? contact + '\n' : '') + '\n' + msg.value.replace(/^Hi Startline Labs,?\s*/, '');
       $('#sf-wa').href = WA + '?text=' + encodeURIComponent(body);
-      $('#sf-mail').href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent((/app/.test(title) ? 'App plan' : 'Project estimate') + (biz.value.trim() ? ' for ' + biz.value.trim() : '')) + '&body=' + encodeURIComponent(body);
+      $('#sf-mail').href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent((opt.subject || (/app/.test(title) ? 'App plan' : 'Project estimate')) + (biz.value.trim() ? ' for ' + biz.value.trim() : '')) + '&body=' + encodeURIComponent(body);
     };
+    const next = $('.sf-next', sendDlg), guide = $('.sf-guide', sendDlg), lab = $('label[for="sf-msg"]');
+    if (next) next.hidden = !opt.order;
+    if (guide) { guide.hidden = !opt.guide; if (opt.guide) guide.href = opt.guide; }
+    if (lab) { if (opt.label) lab.textContent = opt.label; else if (lab.textContent === 'Your order') lab.textContent = 'Your estimate'; }
+    $('.sf-lead', sendDlg).textContent = opt.order ? 'Add your details and send your order by WhatsApp or email. Nothing to pay yet: here is what happens next.' : 'Your choices are already filled in. Add your details and send it by WhatsApp or email. We reply the same working day.';
     [msg, name, biz, phone, email].forEach(el => { el.oninput = sync; });
     sync();
     if (sendDlg.showModal) sendDlg.showModal(); else sendDlg.setAttribute('open', '');
     setTimeout(() => name.focus(), 50);
   };
+
+  /* ---------- order buttons: any [data-order] opens the order sheet ---------- */
+  document.addEventListener('click', e => {
+    const a = e.target.closest('[data-order]');
+    if (!a || !sendDlg || e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    const item = a.dataset.order, price = a.dataset.price || '';
+    openSend('Hi Startline Labs, I would like to order: ' + item + (price ? ' (' + price + ')' : '') + '.\nPlease send me the quote and deposit invoice.\n\nAnything we should know (optional):\n',
+      'Start your order', { order: true, subject: 'Order: ' + item, label: 'Your order', guide: a.dataset.guide });
+  });
 
   /* ---------- estimator ---------- */
   const est = $('#est');
