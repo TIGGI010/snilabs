@@ -1556,3 +1556,29 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .ev-dotc{fill:#fff}
 @media (prefers-reduced-motion:reduce){.ev-spin,.ev-pulse,.ev-sweep,.ev-led.on{animation:none}.ev-sweep{display:none}}
 .ev-swipe{display:none}@media (max-width:760px){.ev-swipe{display:inline}}
+
+/* ---------- footer, tidied ---------- */
+.foot.foot2{grid-template-columns:minmax(0,1.5fr) repeat(4,minmax(0,1fr));gap:36px 32px}
+.foot2 .fcol h3{margin:0 0 16px;font-size:12.5px;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.foot2 .fcol ul{gap:10px}
+.foot2 .fcol li a,.foot2 .fcol li button{font-size:14.5px}
+.foot2 .fcol a.more{color:var(--blue,#0B5CFF)}
+.foot2 .fcol svg,.fcontact svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fbrand .fcontact{margin-top:20px;gap:9px}
+.fbrand .social{margin-top:18px}
+.foot-more{margin-top:clamp(32px,4vw,48px);padding-top:22px;border-top:1px solid var(--line);display:grid;gap:12px}
+.foot-more p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-3);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.foot-more p>span{flex:1 1 0;min-width:0}
+.foot-more b{color:var(--ink-2);font-weight:700;margin-right:6px}
+.foot-more a{color:var(--ink-2)}.foot-more a:hover{color:var(--ink)}
+@media (max-width:1080px){.foot.foot2{grid-template-columns:repeat(4,minmax(0,1fr))}.foot2 .fbrand{grid-column:1/-1}}
+@media (max-width:640px){.foot.foot2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.apps .app.app-wide{grid-column:span 2;flex-direction:row;align-items:center;gap:clamp(16px,2vw,24px)}
+@media (max-width:620px){.apps .app.app-wide{grid-column:auto}}
+.eng-mini .ev{border-radius:20px;box-shadow:none}
+.eng-mini .ev figcaption{display:none}
+.case-logo.cbadge svg{width:56px;height:56px;display:block;border-radius:14px}
+.wproj:has(input[value="engine"]:checked) .wpanel[data-g="engine"]{display:block}
+.wtabs.wtabs-lg{grid-template-columns:repeat(5,minmax(0,1fr));max-width:860px}
+@media (max-width:620px){.wtabs.wtabs-lg{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.eng-mini{align-self:center}
