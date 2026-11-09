@@ -1497,3 +1497,5 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .eng-book blockquote{margin:4px 0;padding:2px 0 2px 16px;border-left:3px solid var(--pa);font-size:14.5px;line-height:1.6;color:var(--ink)}
 .eng-book .in{margin:auto 0 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--pa) 8%,transparent);font-size:14px;line-height:1.55;color:var(--ink-2)}
 .eng-book .in b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pa);margin-bottom:4px}
+.brand-board{margin:0;border-radius:24px;overflow:hidden;border:1px solid var(--line)}
+.brand-board img{display:block;width:100%;height:auto}
