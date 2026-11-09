@@ -1408,3 +1408,15 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
   .wa-fab{display:none}
   body{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 }
+
+/* ---------- Startline Engine ---------- */
+.eng-visual{display:flex;align-items:center;justify-content:center;color:#fff}
+.eng-chart{width:100%;max-width:520px;height:auto}
+.eng-chart rect{fill:#fff}
+.eng-chart .eng-t{font:600 13px var(--font,sans-serif);fill:rgba(255,255,255,.8)}
+.eng-chart path[fill]{fill:#fff}
+.eng-st{display:inline-flex;align-self:flex-start;margin-bottom:12px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:color-mix(in srgb,var(--pa) 14%,transparent);color:var(--pa)}
+.eng-st.dev{background:var(--line);color:var(--ink-2)}
+.tiers.eng-offers{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:700px){.tiers.eng-offers{grid-template-columns:minmax(0,1fr)}}
+.eng-chart text.eng-t{font-size:12px}
