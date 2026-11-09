@@ -1128,4 +1128,73 @@
 
 
 
+
+  /* ---------- Startline Engine: live diagram ---------- */
+  const ev = $('#eng-viz');
+  if (ev) {
+    const NS = 'http://www.w3.org/2000/svg', svg = $('svg', ev), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const sc = $('.ev-scroll', ev); if (sc && sc.scrollWidth > sc.clientWidth) sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2;
+    const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+    const ins = [...svg.querySelectorAll('.ev-wire.in')], outs = [...svg.querySelectorAll('.ev-wire.out')];
+    const nodes = [...svg.querySelectorAll('.ev-node')], webs = [...svg.querySelectorAll('.ev-web')], ios = [...svg.querySelectorAll('.ev-io')];
+    const layer = mk('g', {}); svg.insertBefore(layer, svg.querySelector('.ev-spin'));
+    const dots = [];
+    const spawn = (path, out) => {
+      const g = mk('g', {}), a = mk('circle', { r: 5, class: 'ev-dot' + (out ? ' o' : '') }), b = mk('circle', { r: 1.8, class: 'ev-dotc' });
+      g.append(a, b); layer.append(g);
+      dots.push({ g, path, len: path.getTotalLength(), t: 0, v: 0.0035 + Math.random() * 0.004 });
+    };
+    // the block: weekly load in phases, built week by week
+    const W = [.42, .47, .52, .36, .56, .61, .66, .46, .70, .76, .82, .58, .88, .92, .55, .34], PH = ['BASE', 'BASE', 'BASE', 'LIGHTER WEEK', 'BASE', 'BUILD', 'BUILD', 'LIGHTER WEEK', 'BUILD', 'BUILD', 'BUILD', 'LIGHTER WEEK', 'PEAK', 'PEAK', 'TAPER', 'TAPER'];
+    const bars = [...svg.querySelectorAll('.ev-bar')], phase = $('#evPhase', svg);
+    const setBar = (i, v) => { const h = Math.max(2, v * 78); bars[i].setAttribute('y', 112 - h); bars[i].setAttribute('height', h); bars[i].classList.toggle('r', PH[i] === 'LIGHTER WEEK'); bars[i].classList.toggle('t', PH[i] === 'TAPER'); };
+    const trace = $('#evTrace', svg), ready = $('#evReady', svg), band = $('#evBand', svg), gval = svg.querySelector('.ev-gval'), mpb = $('#evMpb', svg), cyc = svg.querySelector('.ev-cyc'), log = $('#evLog', svg);
+    const LOG = ['Session in: 14.2 km easy run · load updated', 'HRV inside baseline band · readiness 81', 'Long run 24 km · durability drift 3.1%', 'Lighter week placed · week 8 of 16',
+                 'Easy run held under the HR cap · habit ticked', 'B race in 3 weeks · used as a hard session', 'Fuel plan: 60 g carbohydrate an hour', 'Taper set · volume down, intensity kept'];
+    let ph = 0, hrv = [];
+    const drawTrace = () => {
+      if (hrv.length < 40) for (let i = 0; i < 40; i++) hrv.push(0);
+      hrv.shift(); ph += 0.35; hrv.push(Math.sin(ph) * 9 + Math.sin(ph * 2.7) * 4 + (Math.random() - .5) * 6);
+      trace.setAttribute('d', hrv.map((v, i) => (i ? 'L' : 'M') + (166 + i * 3.1).toFixed(1) + ' ' + (86 + v).toFixed(1)).join(' '));
+    };
+    if (still) {
+      W.forEach((v, i) => setBar(i, v)); phase.textContent = 'RACE READY'; for (let i = 0; i < 40; i++) drawTrace();
+      nodes[3].classList.add('hot'); webs.filter(w => w.dataset.k === '3').forEach(w => w.classList.add('hot'));
+    } else {
+      ins.forEach(p => { spawn(p); spawn(p); }); outs.forEach(p => spawn(p, true));
+      dots.forEach(d => { d.t = Math.random(); });
+      let on = false, last = 0, tick = 0, wk = 0, cycle = 1, li = 0, r = 81;
+      const io = new IntersectionObserver(es => { on = es[0].isIntersecting; if (on) requestAnimationFrame(loop); }, { threshold: 0.05 });
+      io.observe(ev);
+      const loop = ts => {
+        if (!on) return;
+        for (const d of dots) {
+          d.t += d.v; if (d.t > 1) { d.t = 0; const i = ins.indexOf(d.path); if (i > -1 && ios[i]) { ios[i].classList.add('hot'); setTimeout(() => ios[i].classList.remove('hot'), 300); } }
+          const p = d.path.getPointAtLength(d.t * d.len); d.g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+        }
+        if (ts - last > 420) {
+          last = ts; tick++;
+          const k = tick % nodes.length; nodes[k].classList.add('hot');
+          const hot = webs.filter(w => w.dataset.k === String(k)); hot.forEach(w => w.classList.add('hot'));
+          setTimeout(() => { nodes[k].classList.remove('hot'); hot.forEach(w => w.classList.remove('hot')); }, 900);
+          drawTrace();
+          if (tick % 2 === 0) {
+            if (wk < 16) { setBar(wk, W[wk]); phase.textContent = PH[wk]; wk++; }
+            else if (wk < 22) { wk++; phase.textContent = 'RACE READY'; }
+            else { wk = 0; bars.forEach((b, i) => { b.setAttribute('y', 110); b.setAttribute('height', 2); }); }
+          }
+          if (tick % 3 === 0) {
+            cycle++; cyc.textContent = 'CYCLE ' + String(cycle).padStart(4, '0');
+            r = Math.max(58, Math.min(92, r + Math.round((Math.random() - .5) * 8)));
+            ready.textContent = r; band.textContent = r >= 80 ? 'PRIMED' : r >= 60 ? 'GOOD' : 'TAKE CARE';
+            gval.setAttribute('stroke-dasharray', r + ' 100');
+            mpb.textContent = '▲ ' + (1.38 + Math.random() * .06).toFixed(2);
+          }
+          if (tick % 7 === 0) { li = (li + 1) % LOG.length; log.textContent = LOG[li]; }
+        }
+        requestAnimationFrame(loop);
+      };
+    }
+  }
+
 })();
