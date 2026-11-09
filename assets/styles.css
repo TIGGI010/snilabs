@@ -1606,3 +1606,14 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .term-cta b{color:#fff;display:inline-flex;align-items:center;gap:6px}
 .term-cta:hover b{text-decoration:underline}
 .term-cta svg{width:15px;height:15px}
+
+.ev-cite{fill:#e0b43c !important;font-size:10.5px !important;font-weight:500 !important;letter-spacing:.04em}
+.ev-wire.lib{stroke:#e0b43c;stroke-opacity:.35;stroke-dasharray:3 5}
+.ev-lib rect{fill:#141006;stroke:#6b5418}
+.ev-lib text{fill:#f3dc9b;font-size:12px;letter-spacing:.18em}
+.ev-lib .n{fill:#e0b43c;font-weight:700}
+.ev-lib .ev-led{fill:#e0b43c}
+.ev-paper{fill:#f3dc9b;stroke:#e0b43c;stroke-width:1}
+.ev-paperl{stroke:#6b5418;stroke-width:1;fill:none}
+.ev-find{fill:#fff;font-size:13.5px;font-weight:600}
+#evCite{fill:#e0b43c}

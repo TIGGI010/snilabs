@@ -1166,6 +1166,8 @@
     const bars = [...svg.querySelectorAll('.ev-bar')], phase = $('#evPhase', svg);
     const setBar = (i, v) => { const h = Math.max(2, v * 78); bars[i].setAttribute('y', 112 - h); bars[i].setAttribute('height', h); bars[i].classList.toggle('r', PH[i] === 'LIGHTER WEEK'); bars[i].classList.toggle('t', PH[i] === 'TAPER'); };
     const trace = $('#evTrace', svg), ready = $('#evReady', svg), band = $('#evBand', svg), gval = svg.querySelector('.ev-gval'), mpb = $('#evMpb', svg), cyc = svg.querySelector('.ev-cyc'), log = $('#evLog', svg);
+    const EVD = [["ATHLETE", [["Daniels, 2014", "Training paces set from a real recent race"], ["Maunder et al., 2021", "Durability: how well fitness holds after hours of work"]]], ["PACE", [["Riegel, 1981", "Race times predicted across distances"], ["Minetti et al., 2002", "The energy cost of running up and down slopes"]]], ["LOAD", [["Gabbett, 2016", "Sudden load spikes, not hard training, drive injury risk"], ["Foster et al., 2001", "Session effort × minutes tracks training load"]]], ["READINESS", [["Kiviniemi et al., 2007", "HRV-guided training beat a fixed plan"], ["Plews et al., 2013", "Weekly HRV averages track adaptation"], ["Mah et al., 2011", "Extra sleep made athletes faster and sharper"]]], ["M/BEAT", [["Buchheit, 2014", "Heart-rate measures reveal training status"], ["Holloszy, 1967", "Endurance training builds new mitochondria"]]], ["DURABILITY", [["Smyth et al., 2022", "Durability in 82,303 marathon runners"], ["Blagrove et al., 2018", "Strength training improves running economy"]]], ["PLAN", [["Seiler, 2010", "Elite endurance athletes train about 80% easy"], ["Bosquet et al., 2007", "A two-week taper, volume down, intensity kept"], ["Nielsen et al., 2014", "Weekly jumps over 30% linked to injury"], ["Frandsen et al., 2025", "Single runs far past the 30-day longest raise injury risk"], ["Helgerud et al., 2007", "4 × 4 intervals lift VO2max more than steady work"]]], ["RACE", [["Jeukendrup, 2014", "Up to 90 g of mixed carbohydrate an hour in long races"], ["Ely et al., 2007", "Marathon times slow as the temperature rises"], ["Zurawlew et al., 2016", "Hot baths after training build heat acclimation"]]], ["CONSISTENCY", [["Halson, 2014", "Monitoring load spots fatigue early"], ["Afremow, 2014", "Be brilliant with the basics, every week"]]]];
+    const act = $('#evAct', svg), cite = $('#evCite', svg), find = $('#evFind', svg), lib = $('#evLib', svg), seen = {};
     const LOG = ['Session in: 14.2 km easy run · load updated', 'HRV inside baseline band · readiness 81', 'Long run 24 km · durability drift 3.1%', 'Lighter week placed · week 8 of 16',
                  'Easy run held under the HR cap · habit ticked', 'B race in 3 weeks · used as a hard session', 'Fuel plan: 60 g carbohydrate an hour', 'Taper set · volume down, intensity kept'];
     let ph = 0, hrv = [];
@@ -1179,6 +1181,7 @@
       nodes[3].classList.add('hot'); webs.filter(w => w.dataset.k === '3').forEach(w => w.classList.add('hot'));
     } else {
       ins.forEach(p => { spawn(p); spawn(p); }); outs.forEach(p => spawn(p, true));
+      if (lib) for (let q = 0; q < 3; q++) { const g = mk('g', {}), r = mk('rect', { x: -5, y: -6.5, width: 10, height: 13, rx: 1.5, class: 'ev-paper' }); g.append(r, mk('path', { d: 'M-2.5 -2h5M-2.5 1h5M-2.5 4h3', class: 'ev-paperl' })); layer.append(g); dots.push({ g, path: lib, len: lib.getTotalLength(), t: q / 3, v: 0.004 }); }
       dots.forEach(d => { d.t = Math.random(); });
       let on = false, last = 0, tick = 0, wk = 0, cycle = 1, li = 0, r = 81;
       const io = new IntersectionObserver(es => { on = es[0].isIntersecting; if (on) requestAnimationFrame(loop); }, { threshold: 0.05 });
@@ -1192,6 +1195,7 @@
         if (ts - last > 420) {
           last = ts; tick++;
           const k = tick % nodes.length; nodes[k].classList.add('hot');
+          if (act) { const e = EVD[k], n = seen[k] = ((seen[k] || 0) + 1) % e[1].length, it = e[1][n]; act.textContent = 'ACTIVE · ' + String(k + 1).padStart(2, '0') + ' ' + e[0]; cite.textContent = it[0]; find.textContent = it[1]; }
           const hot = webs.filter(w => w.dataset.k === String(k)); hot.forEach(w => w.classList.add('hot'));
           setTimeout(() => { nodes[k].classList.remove('hot'); hot.forEach(w => w.classList.remove('hot')); }, 900);
           drawTrace();
