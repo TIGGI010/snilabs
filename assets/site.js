@@ -1126,4 +1126,56 @@
     update();
   }
 
+
+  /* ---------- Startline Engine: plan model demo ---------- */
+  const engDemo = $('#eng-demo');
+  if (engDemo) {
+    const f = $('.eng-in', engDemo), sum = $('.eng-sum', engDemo), plot = $('.eng-plot', engDemo), rules = $('.eng-rules', engDemo);
+    const PEAK = { 5: 35, 10: 45, 21.1: 55, 42.2: 70, 56: 85, 90: 100 }, LCAP = { 5: 12, 10: 16, 21.1: 21, 42.2: 32, 56: 40, 90: 45 };
+    const NAME = { 5: '5 km', 10: '10 km', 21.1: 'half marathon', 42.2: 'marathon', 56: '56 km ultra', 90: '90 km ultra' };
+    const r1 = x => Math.round(x * 10) / 10, num = (el, lo, hi, d) => { const v = parseFloat(el.value); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+    const run = () => {
+      const D = parseFloat(f.race.value), N = num(f.weeks, 6, 30, 16), V = num(f.vol, 5, 200, 35), L0 = num(f.long, 3, 80, 16), days = +f.days.value;
+      const T = D >= 42 ? 3 : 2, B = N - T, target = Math.max(PEAK[D], V), share = ({ 5: 0.28, 10: 0.3, 21.1: 0.35, 42.2: 0.42, 56: 0.45, 90: 0.45 })[D] + (days <= 3 ? 0.05 : 0);
+      const W = []; let prev = V, longs = [L0], capped = false;
+      for (let i = 0; i < B; i++) {
+        const light = i > 0 && (i + 1) % 4 === 0 && i < B - 2;
+        let v = light ? prev * 0.75 : Math.min(prev * 1.1, target);
+        if (!light) prev = v;
+        const ph = light ? 'r' : i >= B - 2 ? 'p' : i < Math.round(B * 0.4) ? 'b' : 'u';
+        const allow = Math.max(...longs.slice(-4)) * 1.1;
+        let lr = light ? longs[longs.length - 1] * 0.8 : Math.min(allow, LCAP[D], Math.max(v * share, Math.min(L0, allow)));
+        lr = Math.max(Math.min(lr, v * 0.5), Math.min(L0, v * 0.25));
+        longs.push(lr); W.push({ v, ph, lr });
+      }
+      const peak = Math.max(...W.map(w => w.v)), peakL = Math.max(...W.map(w => w.lr));
+      if (peak < target - 0.5) capped = true;
+      const tap = T === 3 ? [0.8, 0.6, 0.45] : [0.6, 0.45];
+      tap.forEach((p, k) => W.push({ v: peak * p, ph: 't', lr: k === tap.length - 1 ? 0 : peakL * (k === 0 && T === 3 ? 0.75 : 0.6), race: k === tap.length - 1 }));
+      const total = W.reduce((a, w) => a + w.v, 0), quality = days >= 5 ? 2 : 1, easy = days - quality;
+      sum.innerHTML = `<div><b>${Math.round(peak)} km</b><span>peak week</span></div><div><b>${r1(peakL)} km</b><span>longest run</span></div><div><b>${Math.round(total)} km</b><span>in ${N} weeks</span></div><div><b>${easy} + ${quality}</b><span>easy + quality runs a week</span></div>`;
+      const w = 640, h = 220, bw = w / W.length, mx = Math.max(peak, 10) * 1.08, Y = v => (h - 24 - v / mx * (h - 40)).toFixed(1);
+      let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Weekly kilometres for ${N} weeks: peak ${Math.round(peak)} km, longest run ${r1(peakL)} km">`;
+      W.forEach((x, i) => {
+        const y = Y(x.v);
+        svg += `<rect class="${x.ph}" x="${(i * bw + bw * 0.14).toFixed(1)}" y="${y}" width="${(bw * 0.72).toFixed(1)}" height="${(h - 24 - y).toFixed(1)}" rx="4"><title>Week ${i + 1}: ${Math.round(x.v)} km${x.lr ? ', long run ' + r1(x.lr) + ' km' : ''}</title></rect>`;
+        if (x.lr) svg += `<circle class="lr" cx="${(i * bw + bw / 2).toFixed(1)}" cy="${Y(x.lr)}" r="4"/>`;
+        if (x.race) svg += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${(+y - 8).toFixed(1)}" text-anchor="middle" class="race">Race</text>`;
+        if (i % (W.length > 20 ? 4 : 2) === 0) svg += `<text x="${(i * bw + bw / 2).toFixed(1)}" y="${h - 6}" text-anchor="middle">W${i + 1}</text>`;
+      });
+      plot.innerHTML = svg + '</svg>';
+      const R = [];
+      if (N < (D >= 42 ? 12 : 8)) R.push(['warn', `${N} weeks is short for a ${NAME[D]}. The plan still builds safely, but expect to race on the fitness you already have.`]);
+      R.push(['', capped ? `Weekly volume grows no more than 10% a week, so it peaks at ${Math.round(peak)} km, short of the ${PEAK[D]} km we would aim for. More weeks or a bigger base would let it go higher. <em>Nielsen et al., 2014</em>`
+                         : `Volume builds from ${Math.round(V)} km to ${Math.round(peak)} km, never more than 10% a week, well inside the 30% jump linked to injuries. <em>Nielsen et al., 2014</em>`]);
+      R.push(['', `The long run never goes more than 10% past the longest of the previous four weeks, topping out at ${r1(peakL)} km. <em>Frandsen et al., 2025</em>`]);
+      R.push(['', 'Every fourth week is lighter, so the work is absorbed before the next step up.']);
+      R.push(['', `A ${T}-week taper cuts volume to about ${Math.round(tap[tap.length - 1] * 100)}% of the peak while keeping some intensity. <em>Bosquet et al., 2007</em>`]);
+      R.push(['', `About 80% of running stays easy: ${easy} easy run${easy === 1 ? '' : 's'} and ${quality} quality session${quality === 1 ? '' : 's'} a week, plus two strength sessions. <em>Seiler, 2010; Blagrove et al., 2018</em>`]);
+      if (L0 < (LCAP[D] || 10) * 0.35) R.push(['warn', `A longest recent run of ${r1(L0)} km is a small base for a ${NAME[D]}, so the long run builds slowly from there.`]);
+      rules.innerHTML = R.map(([c, t]) => `<li class="${c}">${t}</li>`).join('');
+    };
+    f.addEventListener('input', run); f.addEventListener('change', run); run();
+  }
+
 })();
