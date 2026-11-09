@@ -865,6 +865,13 @@
     const box = $('textarea', f); box.value = b.dataset.fill; box.dispatchEvent(new Event('input'));
     $$('[data-fill]').forEach(x => x.classList.toggle('on', x === b)); box.focus();
   }));
+  $$('[data-ask-go]').forEach(b => b.addEventListener('click', () => { const f = $('form[data-ask]'); if (f) f.requestSubmit(); }));
+  $$('[data-quote-btn]').forEach(b => b.addEventListener('click', () => {
+    const brief = (($('form[data-ask] textarea') || {}).value || '').trim();
+    if (!sendDlg) { location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Quote request') + '&body=' + encodeURIComponent(brief || 'I would like a quote.'); return; }
+    openSend('Hi Startline Labs, I would like a free quote.\n\nWhat I need: ' + brief + '\n', 'Get your free quote', { order: true, subject: 'Quote request', label: 'What you need' });
+    const em = $('#sf-email'); if (em) setTimeout(() => em.focus(), 60);
+  }));
   $$('form[data-quote]').forEach(f => f.addEventListener('submit', e => {
     e.preventDefault();
     const mail = $('input', f), v = mail.value.trim();
@@ -1216,6 +1223,109 @@
         requestAnimationFrame(loop);
       };
     }
+  }
+
+
+  /* ---------- Startline Engine: a year of data flowing into nine models ---------- */
+  const fl = $('#eng-flow');
+  if (fl) {
+    const cv = $('canvas', fl), ctx = cv.getContext('2d'), sel = $('.flow-sel', fl), MODELS = JSON.parse(fl.dataset.models);
+    const SHORT = { 'Athlete model': 'Athlete', 'Pace model': 'Pace', 'Load model': 'Load', 'Readiness model': 'Readiness', 'Metres per heartbeat': 'm/beat', 'Durability and climbing': 'Durability', 'Plan model': 'Plan', 'Race model': 'Race', 'Consistency model': 'Consistency' };
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W = 0, H = 0, dpr = 1, dots = [], bins = [], hot = -1, shown = 0, raf = 0, started = false;
+    const rnd = (a => () => (a = (a * 16807) % 2147483647) / 2147483647)(20261109);
+    const layout = () => {
+      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1);
+      W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
+      const n = W < 600 ? 1500 : 2920, pad = W < 600 ? 10 : 24, gap = W < 600 ? 3 : 6, total = MODELS.reduce((a, m) => a + Math.max(m.k, 2.5), 0);
+      const usable = W - pad * 2 - gap * (MODELS.length - 1);
+      let x = pad; bins = MODELS.map(m => { const w = usable * Math.max(m.k, 2.5) / total, b = { x, w, m }; x += w + gap; return b; });
+      const topA = H * .05, topB = H * .36, by = H - (W < 600 ? 74 : 86);
+      const r2 = (a => () => (a = (a * 16807) % 2147483647) / 2147483647)(1109);
+      const pick = () => { let t = r2() * total; for (let i = 0; i < bins.length; i++) { t -= Math.max(MODELS[i].k, 2.5); if (t <= 0) return i; } return bins.length - 1; };
+      dots = Array.from({ length: n }, () => {
+        const i = pick(), b = bins[i], x0 = pad + r2() * (W - pad * 2), y0 = topA + r2() * (topB - topA);
+        return { x0, y0, x1: b.x + 2 + r2() * (b.w - 4), y1: by, i, tw: r2() * 6.28 };
+      });
+      bins.forEach(b => { b.y = by; });
+    };
+    const draw = t => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = W < 600 ? .5 : .6;
+      const lim = Math.floor(shown);
+      for (let k = 0; k < lim; k++) {
+        const d = dots[k], on = hot < 0 || d.i === hot;
+        ctx.strokeStyle = on ? (hot < 0 ? 'rgba(61,220,138,.11)' : 'rgba(61,220,138,.34)') : 'rgba(61,220,138,.012)';
+        const my = d.y0 + (d.y1 - d.y0) * .5;
+        ctx.beginPath(); ctx.moveTo(d.x0, d.y0); ctx.bezierCurveTo(d.x0, my, d.x1, d.y1 - (d.y1 - d.y0) * .42, d.x1, d.y1); ctx.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      for (let k = 0; k < dots.length; k++) {
+        const d = dots[k], a = still ? .7 : .45 + .4 * Math.sin(t / 900 + d.tw);
+        ctx.fillStyle = (hot < 0 || d.i === hot) ? `rgba(235,255,244,${a})` : 'rgba(235,255,244,.12)';
+        ctx.fillRect(d.x0 - .7, d.y0 - .7, 1.4, 1.4);
+      }
+      const small = W < 600;
+      bins.forEach((b, i) => {
+        ctx.fillStyle = hot < 0 || hot === i ? '#3DDC8A' : 'rgba(61,220,138,.25)';
+        ctx.fillRect(b.x, b.y, b.w, small ? 14 : 22);
+        ctx.fillStyle = 'rgba(235,255,244,.75)'; ctx.font = `600 ${small ? 9 : 12}px ui-monospace,Menlo,Consolas,monospace`; ctx.textAlign = 'center';
+        ctx.fillText(String(b.m.k), b.x + b.w / 2, b.y - 8);
+        ctx.fillStyle = hot === i ? '#fff' : 'rgba(235,255,244,.9)'; ctx.font = `700 ${small ? 9 : 13}px Montserrat,system-ui,sans-serif`;
+        const label = SHORT[b.m.n] || b.m.n;
+        ctx.fillText(small ? String(i + 1).padStart(2, '0') : label, b.x + b.w / 2, b.y + (small ? 30 : 44 + (b.w < 70 && i % 2 ? 16 : 0)));
+      });
+    };
+    const loop = t => {
+      if (shown < dots.length) shown = Math.min(dots.length, shown + dots.length / 150);
+      draw(t);
+      raf = still ? 0 : requestAnimationFrame(loop);
+    };
+    const start = () => { if (started) return; started = true; layout(); shown = still ? dots.length : 0; if (still) draw(0); else raf = requestAnimationFrame(loop); };
+    new IntersectionObserver(es => { if (es[0].isIntersecting) start(); }, { threshold: .15 }).observe(fl);
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (started) { layout(); if (still) draw(0); } }, 150); });
+    const pickBin = e => { const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; if (y < H * .45) return -1; return bins.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); };
+    const setHot = i => {
+      if (i === hot) return; hot = i; if (still) draw(0);
+      if (i < 0) { sel.textContent = 'Tap a model to see the research behind it.'; return; }
+      const m = MODELS[i]; sel.innerHTML = '<b>' + String(i + 1).padStart(2, '0') + ' ' + m.n + '</b> · ' + m.s.join(' · ');
+    };
+    cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') setHot(pickBin(e)); });
+    cv.addEventListener('pointerleave', () => setHot(-1));
+    cv.addEventListener('click', e => { const i = pickBin(e); setHot(i === hot ? -1 : i); });
+  }
+
+
+  /* ---------- Startline Engine hero: data flowing into a 16-week block ---------- */
+  const hf = $('#eng-hflow');
+  if (hf) {
+    const cv = $('canvas', hf), ctx = cv.getContext('2d'), WK = JSON.parse(hf.dataset.weeks), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let W, H, dpr, dots = [], bars = [], shown = 0;
+    const lay = () => {
+      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
+      const pad = 8, gap = 5, bw = (W - pad * 2 - gap * 15) / 16, base = H - 34, maxH = H * .42;
+      bars = WK.map(([v, ph], i) => ({ x: pad + i * (bw + gap), w: bw, h: v * maxH, ph, y: base - v * maxH, base }));
+      const r2 = (a => () => (a = (a * 16807) % 2147483647) / 2147483647)(42), tot = WK.reduce((a, w) => a + w[0], 0), n = W < 420 ? 900 : 1500;
+      dots = Array.from({ length: n }, () => {
+        let t = r2() * tot, i = 0; for (; i < 15; i++) { t -= WK[i][0]; if (t <= 0) break; }
+        const b = bars[i]; return { x0: pad + r2() * (W - pad * 2), y0: H * .03 + r2() * H * .2, x1: b.x + 1 + r2() * (b.w - 2), y1: b.y, tw: r2() * 6.28 };
+      });
+    };
+    const draw = t => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = .55; ctx.strokeStyle = 'rgba(255,255,255,.07)';
+      const lim = Math.floor(shown);
+      for (let k = 0; k < lim; k++) { const d = dots[k], my = d.y0 + (d.y1 - d.y0) * .5; ctx.beginPath(); ctx.moveTo(d.x0, d.y0); ctx.bezierCurveTo(d.x0, my, d.x1, d.y1 - (d.y1 - d.y0) * .45, d.x1, d.y1); ctx.stroke(); }
+      ctx.globalCompositeOperation = 'source-over';
+      for (const d of dots) { ctx.fillStyle = `rgba(255,255,255,${still ? .7 : .4 + .45 * Math.sin(t / 800 + d.tw)})`; ctx.fillRect(d.x0 - .7, d.y0 - .7, 1.4, 1.4); }
+      const grow = Math.min(1, shown / dots.length);
+      bars.forEach(b => { const h = b.h * grow; ctx.fillStyle = b.ph === 't' ? '#FFD60A' : `rgba(255,255,255,${b.ph === 'r' ? .45 : b.ph === 'b' ? .7 : .95})`; ctx.fillRect(b.x, b.base - h, b.w, h); });
+      ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.font = '600 11px Montserrat,system-ui,sans-serif'; ctx.textAlign = 'left';
+      [['Base', 0], ['Build', 5], ['Peak', 12], ['Taper', 14]].forEach(([l, i]) => ctx.fillText(l.toUpperCase(), bars[i].x, H - 14));
+    };
+    const loop = t => { if (shown < dots.length) shown = Math.min(dots.length, shown + dots.length / 120); draw(t); if (!still) requestAnimationFrame(loop); };
+    lay(); shown = still ? dots.length : 0; still ? draw(0) : requestAnimationFrame(loop);
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { lay(); if (still) draw(0); }, 150); });
   }
 
 })();

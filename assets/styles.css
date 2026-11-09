@@ -1617,3 +1617,31 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .ev-paperl{stroke:#6b5418;stroke-width:1;fill:none}
 .ev-find{fill:#fff;font-size:13.5px;font-weight:600}
 #evCite{fill:#e0b43c}
+
+/* ---------- engine: data-flow graphic ---------- */
+.flow{margin:0;border-radius:28px;overflow:hidden;background:#030806;border:1px solid #12301f}
+.flow canvas{display:block;width:100%;aspect-ratio:16/11;cursor:pointer;touch-action:pan-y}
+@media (max-width:600px){.flow canvas{aspect-ratio:3/4}}
+.flow figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;padding:14px 20px 18px;border-top:1px solid #12301f;font-size:13px;color:#8fb9a3}
+.flow-cap{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:#3DDC8A}
+.flow-sel{flex:1 1 320px;text-align:right}.flow-sel b{color:#fff}
+@media (max-width:600px){.flow-sel{text-align:left}}
+
+.hflow{margin:0;width:100%;max-width:560px}
+.hflow canvas{display:block;width:100%;aspect-ratio:1/1}
+
+/* ---------- home hero, simplified ---------- */
+.hero .lead{max-width:30em}
+.hero .ask{margin-top:28px}
+.hero .ask-picks{margin-top:12px;gap:6px}
+.hero .ask-picks button{padding:6px 12px;font-size:13px;background:transparent}
+.hero-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:26px}
+.hero-acts .btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9}
+.hero-link{font-size:14.5px;font-weight:650;color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+.hero-link:hover{color:var(--ink)}
+.hero-link svg{width:15px;height:15px}
+.hero-trust{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin-top:26px;font-size:13.5px;font-weight:600;color:var(--ink-3)}
+.hero-trust .stars{color:#F5B301;letter-spacing:1px;margin-right:6px}
+.hero-trust b{color:var(--ink);margin-right:4px}
+.hero-trust i{width:3px;height:3px;border-radius:50%;background:currentColor;margin:0 12px;opacity:.6}
+@media (max-width:520px){.hero-acts .btn{flex:1 1 100%;justify-content:center}.hero-trust i{margin:0 8px}}
