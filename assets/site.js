@@ -1226,106 +1226,144 @@
   }
 
 
-  /* ---------- Startline Engine: a year of data → nine models → five outputs ---------- */
+  /* ---------- Startline Engine: a year of data → nine models → five outputs, for every sport ---------- */
   const fl = $('#eng-flow');
   if (fl) {
-    const cv = $('canvas', fl), ctx = cv.getContext('2d'), sel = $('.flow-sel', fl), leg = $('.flow-legend', fl), MODELS = JSON.parse(fl.dataset.models);
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const SHORT = ['Athlete', 'Pace', 'Load', 'Readiness', 'm/beat', 'Durability', 'Plan', 'Race', 'Consistency'];
-    // sources: name, colour, points a year, the models they feed (by index)
-    const SRC = [
-      ['Profile, race results and PBs', '#FFD60A', 20, [0, 1, 7], 'Profile, race results and PBs'],
-      ['Races', '#FF8FB8', 12, [6, 7, 1], 'Races with date, distance, climbing and A, B or C priority'],
-      ['Sessions', '#3DDC8A', 300, [0, 1, 2, 4, 5, 6, 8], 'Sessions from Strava or entered by hand'],
-      ['Morning check-in', '#4DD6FF', 1825, [3, 8, 2], 'Morning check-in: sleep, HRV, resting heart rate, legs, niggles'],
-      ['Strength, food and race fuel', '#FFA552', 763, [2, 7, 8, 5], 'Strength sessions, food and race fuel']];
-    const OUT = ['A periodised plan, counted back from race day', 'Paces and heart-rate zones for every session', 'A readiness score each morning',
-                 'Fitness, load and durability trends', 'Race-day pacing, fuel plan and countdown'];
+    const cv = $('canvas', fl), ctx = cv.getContext('2d'), sel = $('.flow-sel', fl), leg = $('.flow-legend', fl), sp = $('.flow-sports', fl), MODELS = JSON.parse(fl.dataset.models);
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches, NAMES = MODELS.map(m => m.n);
+    const COL = ['#FFD60A', '#FF8FB8', '#3DDC8A', '#4DD6FF', '#FFA552'];
+    const IN_FEEDS = [[0, 1, 7], [6, 7, 1], [0, 1, 2, 4, 5, 6, 8], [3, 8, 2], [2, 7, 8, 5]];
+    const OUT = ['A periodised plan, counted back from race day', 'Paces and heart-rate zones for every session', 'A readiness score each morning', 'Fitness, load and durability trends', 'Race-day pacing, fuel plan and countdown'];
     const M2O = [[0, 1, 4], [1, 4, 0], [3, 2, 0], [2, 0], [3, 1], [3, 4, 0], [0], [4], [0, 2]];
-    const NAMES = MODELS.map(m => m.n);
-    const wrap = (txt, maxW) => { const w = txt.split(' '), lines = []; let cur = ''; w.forEach(x => { const t = cur ? cur + ' ' + x : x; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = x; } else cur = t; }); if (cur) lines.push(cur); return lines; };
-    let W, H, dpr, small, dots = [], links = [], mb = [], ob = [], shown = 0, started = false, hot = null;
+    // per sport: input names, typical yearly points, models that matter less (dimmed), outputs that matter less
+    const SPORTS = [
+      { k: 'all', n: 'All sports', ins: ['Profile, race results and PBs', 'Races: date, distance, climbing, A/B/C', 'Sessions from Strava or by hand', 'Morning check-in', 'Strength, food and race fuel'], pts: [20, 12, 300, 1825, 763], dimM: [], dimO: [] },
+      { k: 'run', n: 'Running', ins: ['Profile, race results and PBs', 'Races: 5 km to Comrades', 'Runs from Strava or by hand', 'Morning check-in', 'Strength, food and race fuel'], pts: [24, 10, 280, 1825, 780], dimM: [], dimO: [] },
+      { k: 'trail', n: 'Trail and ultra', ins: ['Profile, race results and PBs', 'Races with distance and climbing', 'Trail runs with vertical metres', 'Morning check-in', 'Strength, food and race fuel'], pts: [16, 6, 260, 1825, 813], dimM: [], dimO: [] },
+      { k: 'tri', n: 'Triathlon', ins: ['Profile, race results and PBs', 'Races: sprint to Ironman', 'Swim, bike and run sessions', 'Morning check-in', 'Strength, food and race fuel'], pts: [18, 8, 420, 1825, 649], dimM: [], dimO: [] },
+      { k: 'hyrox', n: 'HYROX', ins: ['Profile, race results and PBs', 'HYROX races and divisions', 'Runs and station sessions', 'Morning check-in', 'Strength, food and race fuel'], pts: [14, 4, 260, 1825, 817], dimM: [], dimO: [] },
+      { k: 'str', n: 'Strength and powerlifting', ins: ['Profile, lifts and PBs', 'Meets with date and A/B/C priority', 'Lifts: sets, reps, load and effort', 'Morning check-in', 'Food, sleep and body weight'], pts: [30, 4, 420, 1825, 641], dimM: [1, 4], dimO: [1] },
+    ];
+    let sport = 0, W, H, dpr, small, dots = [], links = [], mb = [], ob = [], shown = 0, started = false, hot = null, layer, lctx, dirty = true, parts = [];
     const R = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
-    leg.innerHTML = SRC.map(([n, c, k, , full], i) => `<button type="button" data-s="${i}" title="${full}"><i style="background:${c}"></i>${n}<small>${k.toLocaleString('en-ZA')}</small></button>`).join('');
+    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
+    const wrap = (c, txt, maxW) => { const w = txt.split(' '), out = []; let cur = ''; w.forEach(x => { const t = cur ? cur + ' ' + x : x; if (c.measureText(t).width > maxW && cur) { out.push(cur); cur = x; } else cur = t; }); if (cur) out.push(cur); return out; };
+    sp.innerHTML = SPORTS.map((s, i) => `<button type="button" data-sp="${i}" class="${i ? '' : 'on'}">${s.n}</button>`).join('');
+    const renderLegend = () => { const S = SPORTS[sport]; leg.innerHTML = S.ins.map((n, i) => `<button type="button" data-s="${i}"><i style="background:${COL[i]}"></i>${n}<small>${S.pts[i].toLocaleString('en-ZA')}</small></button>`).join(''); };
     const lay = () => {
-      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; small = W < 640;
-      const pad = small ? 10 : 26, gap = small ? 3 : 7, rnd = R(20261109);
+      const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; small = W < 640;
+      cv.width = W * dpr; cv.height = H * dpr; layer = document.createElement('canvas'); layer.width = cv.width; layer.height = cv.height; lctx = layer.getContext('2d');
+      const S = SPORTS[sport], pad = small ? 10 : 28, gap = small ? 3 : 8, rnd = R(20261109 + sport * 7);
       const wsum = MODELS.reduce((a, m) => a + Math.max(m.k, 2.5), 0), usable = W - pad * 2 - gap * 8;
-      let x = pad; const my = H * .5;
+      let x = pad; const my = H * .48;
       mb = MODELS.map((m, i) => { const w = usable * Math.max(m.k, 2.5) / wsum, b = { x, w, y: my, i }; x += w + gap; return b; });
-      const ow = (W - pad * 2 - (small ? 4 : 14) * 4) / 5, oy = H * (small ? .8 : .8);
-      ob = OUT.map((n, i) => ({ x: pad + i * (ow + (small ? 4 : 14)), w: ow, y: oy, i }));
-      const n = small ? 1500 : 2920, tot = SRC.reduce((a, s) => a + s[2], 0);
+      const og = small ? 4 : 16, ow = (W - pad * 2 - og * 4) / 5, oy = H * .79;
+      ob = OUT.map((n, i) => ({ x: pad + i * (ow + og), w: ow, y: oy, i }));
+      const n = small ? 1400 : 2920, tot = S.pts.reduce((a, b) => a + b, 0);
       dots = [];
-      SRC.forEach((s, si) => { const c = Math.max(6, Math.round(n * s[2] / tot)); for (let k = 0; k < c; k++) {
-        const mi = s[3][Math.floor(rnd() * s[3].length)], b = mb[mi];
-        dots.push({ x0: pad + rnd() * (W - pad * 2), y0: H * .02 + rnd() * H * .17, x1: b.x + 2 + rnd() * (b.w - 4), y1: b.y, s: si, m: mi, tw: rnd() * 6.28 }); } });
+      S.pts.forEach((c0, si) => { const c = Math.max(8, Math.round(n * c0 / tot)); for (let k = 0; k < c; k++) {
+        const feeds = IN_FEEDS[si].filter(m => !S.dimM.includes(m)), mi = feeds[Math.floor(rnd() * feeds.length)], b = mb[mi];
+        dots.push({ x0: pad + rnd() * (W - pad * 2), y0: H * .03 + rnd() * H * .15, x1: b.x + 2 + rnd() * (b.w - 4), y1: b.y, s: si, m: mi }); } });
       dots.sort(() => rnd() - .5);
       const cnt = mb.map((b, i) => dots.filter(d => d.m === i).length);
       links = [];
-      mb.forEach((b, i) => { const per = Math.max(30, Math.round(cnt[i] / (small ? 3 : 2.2))); for (let k = 0; k < per; k++) {
-        const oi = M2O[i][Math.floor(rnd() * M2O[i].length)], o = ob[oi];
-        links.push({ x0: b.x + 2 + rnd() * (b.w - 4), y0: b.y + (small ? 14 : 20), x1: o.x + 2 + rnd() * (o.w - 4), y1: o.y, m: i, o: oi }); } });
+      mb.forEach((b, i) => { const per = Math.max(24, Math.round(cnt[i] / (small ? 3 : 2.4))), outs = M2O[i].filter(o => !S.dimO.includes(o)); if (!outs.length) return; for (let k = 0; k < per; k++) {
+        const oi = outs[Math.floor(rnd() * outs.length)], o = ob[oi];
+        links.push({ x0: b.x + 2 + rnd() * (b.w - 4), y0: b.y + (small ? 14 : 22), x1: o.x + 2 + rnd() * (o.w - 4), y1: o.y, m: i, o: oi }); } });
+      parts = []; dirty = true;
     };
-    const isOn = (kind, d) => {
-      if (!hot) return true;
-      if (hot.t === 's') return kind === 'd' ? d.s === hot.i : SRC[hot.i][3].includes(d.m);
-      if (hot.t === 'm') return d.m === hot.i;
-      if (hot.t === 'o') return kind === 'l' ? d.o === hot.i : M2O[d.m].includes(hot.i);
-    };
-    const curve = (a, b, c, d, k) => { const m = b + (d - b) * .5; ctx.beginPath(); ctx.moveTo(a, b); ctx.bezierCurveTo(a, m, c, d - (d - b) * k, c, d); ctx.stroke(); };
-    const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${n >> 8 & 255},${n & 255},${a})`; };
-    const draw = t => {
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = small ? .5 : .6;
-      const lim = Math.floor(shown), base = hot ? .02 : .1;
-      for (let k = 0; k < Math.min(lim, dots.length); k++) { const d = dots[k], on = isOn('d', d); ctx.strokeStyle = rgba(SRC[d.s][1], on ? (hot ? .34 : base) : .012); curve(d.x0, d.y0, d.x1, d.y1, .42); }
-      const ll = Math.floor(links.length * Math.min(1, lim / dots.length));
-      for (let k = 0; k < ll; k++) { const l = links[k], on = isOn('l', l); ctx.strokeStyle = on ? (hot ? 'rgba(235,255,244,.3)' : 'rgba(235,255,244,.09)') : 'rgba(235,255,244,.012)'; curve(l.x0, l.y0, l.x1, l.y1, .4); }
-      ctx.globalCompositeOperation = 'source-over';
-      for (const d of dots) { const on = isOn('d', d), a = still ? .8 : .5 + .4 * Math.sin(t / 900 + d.tw); ctx.fillStyle = rgba(SRC[d.s][1], on ? a : .1); ctx.fillRect(d.x0 - .8, d.y0 - .8, 1.6, 1.6); }
-      const bh = small ? 14 : 20;
-      ctx.textAlign = 'center';
+    const dm = i => SPORTS[sport].dimM.includes(i), dO = i => SPORTS[sport].dimO.includes(i);
+    const onM = i => !dm(i) && (!hot || (hot.t === 'm' ? hot.i === i : hot.t === 's' ? IN_FEEDS[hot.i].includes(i) : M2O[i].includes(hot.i)));
+    const onO = i => !dO(i) && (!hot || (hot.t === 'o' ? hot.i === i : hot.t === 'm' ? M2O[hot.i].includes(i) : IN_FEEDS[hot.i].some(m => !dm(m) && M2O[m].includes(i))));
+    const onD = d => !hot || (hot.t === 's' ? d.s === hot.i : hot.t === 'm' ? d.m === hot.i : M2O[d.m].includes(hot.i));
+    const onL = l => !hot || (hot.t === 'o' ? l.o === hot.i : hot.t === 'm' ? l.m === hot.i : IN_FEEDS[hot.i].includes(l.m));
+    const bez = (c, a, b, x2, y2, k) => { const m = b + (y2 - b) * .5; c.beginPath(); c.moveTo(a, b); c.bezierCurveTo(a, m, x2, y2 - (y2 - b) * k, x2, y2); c.stroke(); };
+    const pt = (a, b, x2, y2, k, t) => { const m = b + (y2 - b) * .5, c1x = a, c1y = m, c2x = x2, c2y = y2 - (y2 - b) * k, u = 1 - t;
+      return [u * u * u * a + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2, u * u * u * b + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y2]; };
+    const paintLayer = () => {
+      const c = lctx; c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+      const lim = Math.floor(shown), frac = Math.min(1, lim / dots.length);
+      c.globalCompositeOperation = 'lighter'; c.lineWidth = small ? .5 : .6;
+      for (let k = 0; k < lim; k++) { const d = dots[k], on = onD(d); c.strokeStyle = rgba(COL[d.s], on ? (hot ? .2 : .085) : .01); bez(c, d.x0, d.y0, d.x1, d.y1, .42); }
+      const ll = Math.floor(links.length * frac);
+      for (let k = 0; k < ll; k++) { const l = links[k]; c.strokeStyle = onL(l) ? (hot ? 'rgba(235,255,244,.075)' : 'rgba(235,255,244,.065)') : 'rgba(235,255,244,.008)'; bez(c, l.x0, l.y0, l.x1, l.y1, .4); }
+      c.globalCompositeOperation = 'source-over';
+      for (const d of dots) { c.fillStyle = rgba(COL[d.s], onD(d) ? .85 : .12); c.fillRect(d.x0 - .8, d.y0 - .8, 1.6, 1.6); }
+      const bh = small ? 14 : 22, mono = 'ui-monospace,Menlo,Consolas,monospace', sans = 'Montserrat,system-ui,sans-serif';
+      // layer rules and titles
+      c.strokeStyle = 'rgba(61,220,138,.14)'; c.lineWidth = 1; c.textAlign = 'left'; c.fillStyle = 'rgba(143,185,163,.95)'; c.font = `700 ${small ? 9 : 11}px ${mono}`;
+      [['INPUTS · A TYPICAL YEAR', H * .205], [small ? 'ENGINE · NINE MODELS' : 'ENGINE · NINE MODELS · BAR WIDTH = STUDIES BEHIND IT', H * .48 - (small ? 26 : 36)], ['OUTPUTS · WHAT THE ATHLETE SEES', ob[0].y - (small ? 12 : 16)]].forEach(([t, y]) => {
+        c.fillText(t, small ? 10 : 28, y); const tw = c.measureText(t).width; c.beginPath(); c.moveTo((small ? 10 : 28) + tw + 10, y - 4); c.lineTo(W - (small ? 10 : 28), y - 4); c.stroke(); });
+      c.textAlign = 'center';
       mb.forEach((b, i) => {
-        const on = !hot || (hot.t === 'm' && hot.i === i) || (hot.t === 's' && SRC[hot.i][3].includes(i)) || (hot.t === 'o' && M2O[i].includes(hot.i));
-        ctx.fillStyle = on ? '#3DDC8A' : 'rgba(61,220,138,.22)'; ctx.fillRect(b.x, b.y, b.w, bh);
-        ctx.fillStyle = 'rgba(235,255,244,.7)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.fillText(MODELS[i].k + (small ? '' : MODELS[i].k === 1 ? ' study' : ' studies'), b.x + b.w / 2, b.y - 8);
-        ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9 : 12.5}px Montserrat,system-ui,sans-serif`;
-        if (small) ctx.fillText(String(i + 1).padStart(2, '0'), b.x + b.w / 2, b.y + bh + 13);
-        else wrap(NAMES[i], Math.max(b.w + 4, 56)).forEach((ln, k) => ctx.fillText(ln, b.x + b.w / 2, b.y + bh + 18 + k * 15));
+        const on = onM(i);
+        c.fillStyle = on ? '#3DDC8A' : 'rgba(61,220,138,.18)'; c.beginPath(); c.roundRect ? c.roundRect(b.x, b.y, b.w, bh, 4) : c.rect(b.x, b.y, b.w, bh); c.fill();
+        if (!small && b.w > 44) { c.fillStyle = on ? '#04140b' : 'rgba(4,20,11,.6)'; c.font = `800 12px ${mono}`; c.fillText(String(MODELS[i].k), b.x + b.w / 2, b.y + 15.5); }
+        c.fillStyle = on ? '#fff' : 'rgba(235,255,244,.35)'; c.font = `700 ${small ? 9 : 12.5}px ${sans}`;
+        if (small) c.fillText(String(i + 1).padStart(2, '0'), b.x + b.w / 2, b.y + bh + 13);
+        else wrap(c, NAMES[i], Math.max(b.w + 6, 60)).forEach((ln, k) => c.fillText(ln, b.x + b.w / 2, b.y + bh + 19 + k * 15));
       });
       ob.forEach((o, i) => {
-        const on = !hot || (hot.t === 'o' && hot.i === i) || (hot.t === 'm' && M2O[hot.i].includes(i)) || (hot.t === 's' && SRC[hot.i][3].some(m => M2O[m].includes(i)));
-        ctx.fillStyle = on ? '#EBFFF4' : 'rgba(235,255,244,.18)'; ctx.fillRect(o.x, o.y, o.w, bh);
-        ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9.5 : 13}px Montserrat,system-ui,sans-serif`;
-        wrap(OUT[i], o.w - 2).slice(0, small ? 7 : 3).forEach((ln, k) => ctx.fillText(ln, o.x + o.w / 2, o.y + bh + (small ? 13 : 20) + k * (small ? 11 : 16)));
+        const on = onO(i);
+        c.fillStyle = on ? '#EBFFF4' : 'rgba(235,255,244,.14)'; c.beginPath(); c.roundRect ? c.roundRect(o.x, o.y, o.w, bh, 4) : c.rect(o.x, o.y, o.w, bh); c.fill();
+        c.fillStyle = on ? '#fff' : 'rgba(235,255,244,.35)'; c.font = `700 ${small ? 9.5 : 13.5}px ${sans}`;
+        wrap(c, OUT[i], o.w - 2).slice(0, small ? 7 : 3).forEach((ln, k) => c.fillText(ln, o.x + o.w / 2, o.y + bh + (small ? 13 : 21) + k * (small ? 11 : 17)));
       });
-      ctx.fillStyle = 'rgba(143,185,163,.9)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.textAlign = 'left';
-      ctx.fillText('DATA', small ? 10 : 26, H * .215 + 12); ctx.fillText('MODELS', small ? 10 : 26, H * .5 - (small ? 22 : 30)); ctx.fillText('OUTPUTS', small ? 10 : 26, ob[0].y - (small ? 10 : 14));
+      dirty = false;
     };
-    const loop = t => { if (shown < dots.length) shown = Math.min(dots.length, shown + dots.length / 160); draw(t); if (!still) requestAnimationFrame(loop); };
-    const start = () => { if (started) return; started = true; lay(); shown = still ? dots.length : 0; still ? draw(0) : requestAnimationFrame(loop); };
-    new IntersectionObserver(es => { if (es[0].isIntersecting) start(); }, { threshold: .12 }).observe(fl);
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (started) { lay(); if (still) draw(0); } }, 150); });
+    const spawn = () => {
+      const pool = dots.filter(onD); if (!pool.length) return;
+      const d = pool[Math.floor(Math.random() * pool.length)], ls = links.filter(l => l.m === d.m && onL(l));
+      parts.push({ d, l: ls.length ? ls[Math.floor(Math.random() * ls.length)] : null, t: 0, v: .006 + Math.random() * .006 });
+    };
+    const frame = () => {
+      if (shown < dots.length) { shown = Math.min(dots.length, shown + dots.length / 140); dirty = true; }
+      if (dirty) paintLayer();
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(layer, 0, 0);
+      if (still || shown < dots.length) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      while (parts.length < (hot ? (small ? 18 : 40) : (small ? 36 : 80))) spawn();
+      ctx.globalCompositeOperation = 'lighter';
+      parts = parts.filter(p => {
+        p.t += p.v; if (p.t >= 2 || (p.t >= 1 && !p.l)) return false;
+        const seg = p.t < 1, tt = seg ? p.t : p.t - 1, col = seg ? COL[p.d.s] : '#EBFFF4';
+        for (let q = 0; q < 4; q++) {
+          const u = Math.max(0, tt - q * .012), [x, y] = seg ? pt(p.d.x0, p.d.y0, p.d.x1, p.d.y1, .42, u) : pt(p.l.x0, p.l.y0, p.l.x1, p.l.y1, .4, u);
+          ctx.fillStyle = rgba(col, q ? .45 / (q + 1) : .9); ctx.beginPath(); ctx.arc(x, y, q ? 1.3 : 1.9, 0, 6.29); ctx.fill();
+        }
+        return true;
+      });
+      ctx.globalCompositeOperation = 'source-over';
+    };
+    let on = false;
+    const loop = () => { if (!on) return; frame(); requestAnimationFrame(loop); };
+    const start = () => { if (!started) { started = true; renderLegend(); lay(); shown = still ? dots.length : 0; } on = true; still ? frame() : requestAnimationFrame(loop); };
+    new IntersectionObserver(es => { if (es[0].isIntersecting) start(); else on = false; }, { threshold: .08 }).observe(fl);
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (started) { lay(); shown = dots.length; frame(); } }, 150); });
     const say = () => {
       $$('button', leg).forEach(b => b.classList.toggle('on', !!hot && hot.t === 's' && +b.dataset.s === hot.i));
-      if (!hot) { sel.textContent = 'Tap a source, a model or an output to follow its path.'; return; }
-      if (hot.t === 's') { const s = SRC[hot.i]; sel.innerHTML = `<b>${s[4]}</b> · about ${s[2].toLocaleString('en-ZA')} points a year, feeding the ${s[3].map(i => NAMES[i].replace(' model', '')).join(', ')} models`; }
-      if (hot.t === 'm') { const m = MODELS[hot.i]; sel.innerHTML = `<b>${String(hot.i + 1).padStart(2, '0')} ${m.n}</b> · ${m.s.join(' · ')}`; }
-      if (hot.t === 'o') { sel.innerHTML = `<b>${OUT[hot.i]}</b> · built by the ${mb.filter((b, i) => M2O[i].includes(hot.i)).map(b => NAMES[b.i].replace(' model', '')).join(', ')} models`; }
+      const S = SPORTS[sport];
+      if (!hot) { sel.innerHTML = sport ? `<b>${S.n}</b> · the same engine, fed with ${S.ins[2].charAt(0).toLowerCase() + S.ins[2].slice(1)}${S.dimM.length ? '. Pace and metres per heartbeat play a smaller part' : ''}.` : 'Tap an input, a model or an output to follow its path.'; return; }
+      if (hot.t === 's') sel.innerHTML = `<b>${S.ins[hot.i]}</b> · about ${S.pts[hot.i].toLocaleString('en-ZA')} points a year, feeding the ${IN_FEEDS[hot.i].filter(m => !S.dimM.includes(m)).map(i => NAMES[i].replace(' model', '')).join(', ')} models`;
+      if (hot.t === 'm') sel.innerHTML = `<b>${String(hot.i + 1).padStart(2, '0')} ${NAMES[hot.i]}</b> · ${MODELS[hot.i].k} studies: ${MODELS[hot.i].s.join(' · ')}`;
+      if (hot.t === 'o') sel.innerHTML = `<b>${OUT[hot.i]}</b> · built by the ${mb.filter((b, i) => M2O[i].includes(hot.i)).map(b => NAMES[b.i].replace(' model', '')).join(', ')} models`;
     };
-    const setHot = h => { if (JSON.stringify(h) === JSON.stringify(hot)) return; hot = h; say(); if (still) draw(0); };
+    const setHot = h => { if (JSON.stringify(h) === JSON.stringify(hot)) return; hot = h; parts = []; dirty = true; say(); if (still) frame(); };
     const pick = e => {
       const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-      if (y > H * .4 && y < H * .72) { const i = mb.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); return i < 0 ? null : { t: 'm', i }; }
+      if (y > H * .4 && y < H * .7) { const i = mb.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); return i < 0 ? null : { t: 'm', i }; }
       if (y > H * .74) { const i = ob.findIndex(b => x >= b.x && x <= b.x + b.w); return i < 0 ? null : { t: 'o', i }; }
-      if (y < H * .24) { const d = dots.reduce((best, d) => { const q = (d.x0 - x) ** 2 + (d.y0 - y) ** 2; return q < best[0] ? [q, d] : best; }, [1e9, null]); return d[1] && d[0] < 400 ? { t: 's', i: d[1].s } : null; }
+      if (y < H * .21) { let best = [1e9, null]; for (const d of dots) { const q = (d.x0 - x) ** 2 + (d.y0 - y) ** 2; if (q < best[0]) best = [q, d]; } return best[1] && best[0] < 400 ? { t: 's', i: best[1].s } : null; }
       return null;
     };
     cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') setHot(pick(e)); });
     cv.addEventListener('pointerleave', () => setHot(null));
     cv.addEventListener('click', e => { const h = pick(e); setHot(h && hot && h.t === hot.t && h.i === hot.i ? null : h); });
     leg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.s; setHot(hot && hot.t === 's' && hot.i === i ? null : { t: 's', i }); });
+    sp.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return; sport = +b.dataset.sp;
+      $$('button', sp).forEach(x => x.classList.toggle('on', x === b)); hot = null; renderLegend(); lay(); shown = still ? dots.length : 0; say(); if (still) frame();
+    });
   }
 
   /* ---------- Startline Engine hero: data flowing into a 16-week block ---------- */

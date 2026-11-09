@@ -1659,3 +1659,17 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .flow-stats span{font-size:12px;color:#7fa792}
 @media (max-width:640px){.flow-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.flow-stats div:nth-child(3){border-right:0}.flow-stats div:nth-child(n+4){border-top:1px solid #12301f}}
 .flow-xl .flow-sel{text-align:left}
+
+.flow-top{padding:16px 20px 6px;display:grid;gap:10px}
+.flow-top .flow-legend{padding:0}
+.flow-sports{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:3px;border-radius:12px;background:#08170f;border:1px solid #12301f;width:max-content;max-width:100%}
+.flow-sports::-webkit-scrollbar{display:none}
+.flow-sports button{flex:none;padding:8px 14px;border-radius:9px;border:0;background:none;color:#8fb9a3;font:700 13px/1 var(--font,sans-serif);cursor:pointer;transition:background .2s,color .2s}
+.flow-sports button:hover{color:#fff}
+.flow-sports button.on{background:#3DDC8A;color:#04140b}
+.flow-xl canvas{aspect-ratio:16/12.5}
+@media (max-width:640px){.flow-xl canvas{aspect-ratio:9/16}}
+
+@media (max-width:640px){.flow-legend button{white-space:normal;text-align:left;font-size:12px;line-height:1.25}.flow-top{padding:14px 14px 4px}}
+.flow-legend button{max-width:100%}
+.flow-top{grid-template-columns:minmax(0,1fr)}
