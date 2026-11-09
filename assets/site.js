@@ -859,6 +859,23 @@
     });
   });
 
+  /* ---------- home: quick picks fill the prompt; the email form opens a ready-made quote request ---------- */
+  $$('[data-fill]').forEach(b => b.addEventListener('click', () => {
+    const f = $('form[data-ask]'); if (!f) return;
+    const box = $('textarea', f); box.value = b.dataset.fill; box.dispatchEvent(new Event('input'));
+    $$('[data-fill]').forEach(x => x.classList.toggle('on', x === b)); box.focus();
+  }));
+  $$('form[data-quote]').forEach(f => f.addEventListener('submit', e => {
+    e.preventDefault();
+    const mail = $('input', f), v = mail.value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(v)) { mail.focus(); mail.classList.add('bad'); return; }
+    mail.classList.remove('bad');
+    const brief = ($('form[data-ask] textarea') || {}).value || '';
+    if (!sendDlg) { location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent('Quote request') + '&body=' + encodeURIComponent((brief || 'I would like a quote.') + '\n\nReply to: ' + v); return; }
+    openSend('Hi Startline Labs, I would like a free quote.\n\nWhat I need: ' + (brief.trim() || '') + '\n\nReply to: ' + v + '\n', 'Get your free quote', { order: true, subject: 'Quote request', label: 'What you need' });
+    const em = $('#sf-email'); if (em) { em.value = v; em.dispatchEvent(new Event('input')); }
+  }));
+
   /* ---------- home prompt bar: carry the description to the estimator ---------- */
   $$('form[data-ask]').forEach(f => {
     const box = $('textarea', f);

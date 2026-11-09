@@ -1582,3 +1582,27 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .wtabs.wtabs-lg{grid-template-columns:repeat(5,minmax(0,1fr));max-width:860px}
 @media (max-width:620px){.wtabs.wtabs-lg{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .eng-mini{align-self:center}
+
+/* ---------- home hero: conversion upgrades ---------- */
+.ask-picks{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:22px}
+.ask-picks span{font-size:13.5px;font-weight:650;color:var(--ink-3);margin-right:2px}
+.ask-picks button{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card,var(--bg));color:var(--ink-2);font:inherit;font-size:13.5px;font-weight:650;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.ask-picks button:hover,.ask-picks button.on{border-color:var(--blue);color:var(--blue);background:color-mix(in srgb,var(--blue) 7%,transparent)}
+.ask-picks+.ask{margin-top:12px}
+.quote-mail{display:flex;gap:8px;margin-top:18px;max-width:560px}
+.quote-mail .inp{flex:1 1 0;min-width:0;height:48px}
+.quote-mail .inp.bad{border-color:#d93025}
+.quote-mail .btn{height:48px;flex:none;white-space:nowrap}
+.quote-mail .btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9}
+.btn-dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn-dark:hover{opacity:.88}
+@media (max-width:520px){.quote-mail{flex-direction:column}.quote-mail .btn{justify-content:center}}
+.ask-alt{margin-top:12px;font-size:14px;color:var(--ink-2);max-width:560px}
+.ask-alt a{color:var(--ink);font-weight:650;text-decoration:underline;text-underline-offset:3px}
+.ticks.ticks-row{flex-direction:row;flex-wrap:wrap;gap:10px 20px;margin-top:24px}
+.ticks-row .stars{color:#F5B301;letter-spacing:1px;font-size:15px}
+.ticks-row b{color:var(--ink)}
+.term-cta{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.7);font-size:13.5px;text-decoration:none}
+.term-cta b{color:#fff;display:inline-flex;align-items:center;gap:6px}
+.term-cta:hover b{text-decoration:underline}
+.term-cta svg{width:15px;height:15px}
