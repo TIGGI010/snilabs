@@ -1234,20 +1234,26 @@
     const SHORT = ['Athlete', 'Pace', 'Load', 'Readiness', 'm/beat', 'Durability', 'Plan', 'Race', 'Consistency'];
     // sources: name, colour, points a year, the models they feed (by index)
     const SRC = [
-      ['Sessions', '#3DDC8A', 300, [0, 1, 2, 4, 5, 6, 8]], ['HRV', '#4DD6FF', 365, [3]], ['Resting HR', '#7A9CFF', 365, [3, 2]],
-      ['Sleep', '#A98BFF', 365, [3, 8]], ['Check-ins', '#FF8FB8', 365, [3, 8]], ['Races', '#FFD60A', 12, [6, 7, 1]], ['Strength and food', '#FFA552', 1148, [2, 7, 8]]];
-    const OUT = ['Periodised plan', 'Paces and zones', 'Readiness score', 'Load and form', 'Race plan and fuel'];
-    const M2O = [[0, 1, 4], [1, 4, 0], [3, 2, 0], [2, 0], [3, 1], [4, 0], [0], [4], [0, 2]];
+      ['Profile, race results and PBs', '#FFD60A', 20, [0, 1, 7], 'Profile, race results and PBs'],
+      ['Races', '#FF8FB8', 12, [6, 7, 1], 'Races with date, distance, climbing and A, B or C priority'],
+      ['Sessions', '#3DDC8A', 300, [0, 1, 2, 4, 5, 6, 8], 'Sessions from Strava or entered by hand'],
+      ['Morning check-in', '#4DD6FF', 1825, [3, 8, 2], 'Morning check-in: sleep, HRV, resting heart rate, legs, niggles'],
+      ['Strength, food and race fuel', '#FFA552', 763, [2, 7, 8, 5], 'Strength sessions, food and race fuel']];
+    const OUT = ['A periodised plan, counted back from race day', 'Paces and heart-rate zones for every session', 'A readiness score each morning',
+                 'Fitness, load and durability trends', 'Race-day pacing, fuel plan and countdown'];
+    const M2O = [[0, 1, 4], [1, 4, 0], [3, 2, 0], [2, 0], [3, 1], [3, 4, 0], [0], [4], [0, 2]];
+    const NAMES = MODELS.map(m => m.n);
+    const wrap = (txt, maxW) => { const w = txt.split(' '), lines = []; let cur = ''; w.forEach(x => { const t = cur ? cur + ' ' + x : x; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = x; } else cur = t; }); if (cur) lines.push(cur); return lines; };
     let W, H, dpr, small, dots = [], links = [], mb = [], ob = [], shown = 0, started = false, hot = null;
     const R = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
-    leg.innerHTML = SRC.map(([n, c, k], i) => `<button type="button" data-s="${i}"><i style="background:${c}"></i>${n}<small>${k.toLocaleString('en-ZA')}</small></button>`).join('');
+    leg.innerHTML = SRC.map(([n, c, k, , full], i) => `<button type="button" data-s="${i}" title="${full}"><i style="background:${c}"></i>${n}<small>${k.toLocaleString('en-ZA')}</small></button>`).join('');
     const lay = () => {
       const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; small = W < 640;
       const pad = small ? 10 : 26, gap = small ? 3 : 7, rnd = R(20261109);
       const wsum = MODELS.reduce((a, m) => a + Math.max(m.k, 2.5), 0), usable = W - pad * 2 - gap * 8;
       let x = pad; const my = H * .5;
       mb = MODELS.map((m, i) => { const w = usable * Math.max(m.k, 2.5) / wsum, b = { x, w, y: my, i }; x += w + gap; return b; });
-      const ow = (W - pad * 2 - (small ? 4 : 14) * 4) / 5, oy = H * (small ? .86 : .84);
+      const ow = (W - pad * 2 - (small ? 4 : 14) * 4) / 5, oy = H * (small ? .8 : .8);
       ob = OUT.map((n, i) => ({ x: pad + i * (ow + (small ? 4 : 14)), w: ow, y: oy, i }));
       const n = small ? 1500 : 2920, tot = SRC.reduce((a, s) => a + s[2], 0);
       dots = [];
@@ -1285,15 +1291,14 @@
         ctx.fillStyle = on ? '#3DDC8A' : 'rgba(61,220,138,.22)'; ctx.fillRect(b.x, b.y, b.w, bh);
         ctx.fillStyle = 'rgba(235,255,244,.7)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.fillText(MODELS[i].k + (small ? '' : MODELS[i].k === 1 ? ' study' : ' studies'), b.x + b.w / 2, b.y - 8);
         ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9 : 12.5}px Montserrat,system-ui,sans-serif`;
-        ctx.fillText(small ? String(i + 1).padStart(2, '0') : SHORT[i], b.x + b.w / 2, b.y + bh + (small ? 13 : 18) + (!small && b.w < 74 && i % 2 ? 15 : 0));
+        if (small) ctx.fillText(String(i + 1).padStart(2, '0'), b.x + b.w / 2, b.y + bh + 13);
+        else wrap(NAMES[i], Math.max(b.w + 4, 56)).forEach((ln, k) => ctx.fillText(ln, b.x + b.w / 2, b.y + bh + 18 + k * 15));
       });
       ob.forEach((o, i) => {
         const on = !hot || (hot.t === 'o' && hot.i === i) || (hot.t === 'm' && M2O[hot.i].includes(i)) || (hot.t === 's' && SRC[hot.i][3].some(m => M2O[m].includes(i)));
         ctx.fillStyle = on ? '#EBFFF4' : 'rgba(235,255,244,.18)'; ctx.fillRect(o.x, o.y, o.w, bh);
         ctx.fillStyle = on ? '#fff' : 'rgba(235,255,244,.45)'; ctx.font = `700 ${small ? 9.5 : 13}px Montserrat,system-ui,sans-serif`;
-        const words = OUT[i].split(' ');
-        if (small) { ctx.fillText(words[0], o.x + o.w / 2, o.y + bh + 13); if (words.length > 1) ctx.fillText(words.slice(1).join(' '), o.x + o.w / 2, o.y + bh + 25); }
-        else ctx.fillText(OUT[i], o.x + o.w / 2, o.y + bh + 20);
+        wrap(OUT[i], o.w - 2).slice(0, small ? 7 : 3).forEach((ln, k) => ctx.fillText(ln, o.x + o.w / 2, o.y + bh + (small ? 13 : 20) + k * (small ? 11 : 16)));
       });
       ctx.fillStyle = 'rgba(143,185,163,.9)'; ctx.font = `600 ${small ? 9 : 11}px ui-monospace,Menlo,Consolas,monospace`; ctx.textAlign = 'left';
       ctx.fillText('DATA', small ? 10 : 26, H * .215 + 12); ctx.fillText('MODELS', small ? 10 : 26, H * .5 - (small ? 22 : 30)); ctx.fillText('OUTPUTS', small ? 10 : 26, ob[0].y - (small ? 10 : 14));
@@ -1305,15 +1310,15 @@
     const say = () => {
       $$('button', leg).forEach(b => b.classList.toggle('on', !!hot && hot.t === 's' && +b.dataset.s === hot.i));
       if (!hot) { sel.textContent = 'Tap a source, a model or an output to follow its path.'; return; }
-      if (hot.t === 's') { const s = SRC[hot.i]; sel.innerHTML = `<b>${s[0]}</b> · ${s[2].toLocaleString('en-ZA')} points a year, feeding ${s[3].map(i => SHORT[i]).join(', ')}`; }
+      if (hot.t === 's') { const s = SRC[hot.i]; sel.innerHTML = `<b>${s[4]}</b> · about ${s[2].toLocaleString('en-ZA')} points a year, feeding the ${s[3].map(i => NAMES[i].replace(' model', '')).join(', ')} models`; }
       if (hot.t === 'm') { const m = MODELS[hot.i]; sel.innerHTML = `<b>${String(hot.i + 1).padStart(2, '0')} ${m.n}</b> · ${m.s.join(' · ')}`; }
-      if (hot.t === 'o') { sel.innerHTML = `<b>${OUT[hot.i]}</b> · built from ${mb.filter((b, i) => M2O[i].includes(hot.i)).map(b => SHORT[b.i]).join(', ')}`; }
+      if (hot.t === 'o') { sel.innerHTML = `<b>${OUT[hot.i]}</b> · built by the ${mb.filter((b, i) => M2O[i].includes(hot.i)).map(b => NAMES[b.i].replace(' model', '')).join(', ')} models`; }
     };
     const setHot = h => { if (JSON.stringify(h) === JSON.stringify(hot)) return; hot = h; say(); if (still) draw(0); };
     const pick = e => {
       const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
       if (y > H * .4 && y < H * .72) { const i = mb.findIndex(b => x >= b.x - 3 && x <= b.x + b.w + 3); return i < 0 ? null : { t: 'm', i }; }
-      if (y > H * .76) { const i = ob.findIndex(b => x >= b.x && x <= b.x + b.w); return i < 0 ? null : { t: 'o', i }; }
+      if (y > H * .74) { const i = ob.findIndex(b => x >= b.x && x <= b.x + b.w); return i < 0 ? null : { t: 'o', i }; }
       if (y < H * .24) { const d = dots.reduce((best, d) => { const q = (d.x0 - x) ** 2 + (d.y0 - y) ** 2; return q < best[0] ? [q, d] : best; }, [1e9, null]); return d[1] && d[0] < 400 ? { t: 's', i: d[1].s } : null; }
       return null;
     };
