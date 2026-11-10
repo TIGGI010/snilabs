@@ -1673,3 +1673,12 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 @media (max-width:640px){.flow-legend button{white-space:normal;text-align:left;font-size:12px;line-height:1.25}.flow-top{padding:14px 14px 4px}}
 .flow-legend button{max-width:100%}
 .flow-top{grid-template-columns:minmax(0,1fr)}
+
+/* ---------- engine page: tighter rhythm ---------- */
+.eng .section{padding-block:clamp(40px,5.5vw,76px)}
+.eng .section.tight{padding-block:clamp(28px,4vw,52px)}
+.eng .section+.section{padding-top:clamp(16px,2.5vw,32px)}
+.eng .head{margin-bottom:clamp(18px,2.4vw,28px)}
+.eng .next-h{margin-top:clamp(28px,3.5vw,44px)}
+.eng-early{margin-top:clamp(24px,3vw,36px)}
+.eng .proj-hero{padding-bottom:clamp(36px,5vw,64px)}
