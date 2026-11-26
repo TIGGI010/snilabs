@@ -215,7 +215,7 @@
       el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
       el.style.setProperty('--my', (e.clientY - r.top) + 'px');
     }));
-    $$('[data-tilt]').forEach(card => {
+    $$('[data-tilt-off]').forEach(card => {
       const ic = $('.app-icon', card);
       if (!ic) return;
       card.addEventListener('pointermove', e => {

@@ -1786,3 +1786,53 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 @media (max-width:640px){.qtbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .qtbl,.qtbl tbody,.qtbl tr,.qtbl th,.qtbl td{display:block}.qtbl tr{padding:14px 0;border-bottom:1px solid var(--line)}
   .qtbl th,.qtbl td{border:0;padding:2px 0}.qtbl td{display:inline-block;margin-right:14px;font-size:14px}}
+
+/* ---------- decluttered (round 15): Apple-like calm. Fewer lines, fewer effects, more room ---------- */
+:root{--fill:#F5F5F7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fill:#16171A}}
+:root[data-theme="dark"]{--fill:#16171A}
+.hero::before,.page-hero::before,.glow,.marquee,.giant{display:none!important}
+.spot::before,.spot::after{display:none!important}
+/* cards: soft fill, no outline */
+.map,.cred,.cert,.cr,.pr,.qual,.review,.tile,.app,.case,.site,.lp-link,.mo-card video,.glance,.stats,.tier,.price-card{border-color:transparent!important;box-shadow:none!important}
+.map,.cred,.cr,.pr,.qual,.review,.tile,.app,.case,.site,.lp-link,.glance,.stats,.tier,.price-card{background:var(--fill)!important}
+.tier.feat,.tier.featured{background:var(--card)!important;box-shadow:0 0 0 2px var(--blue)!important}
+.ci{background:transparent!important}
+/* header: icon-only search, lighter bar */
+.kbtn span,.kbtn kbd{display:none}
+.kbtn{width:40px;padding:0;justify-content:center}
+/* no floating WhatsApp bubble on computers; the phone bar stays */
+@media (min-width:900px){.wa-fab{display:none!important}}
+/* more room between sections, calmer motion */
+.section{padding-block:clamp(64px,9vw,128px)}
+.section.tight{padding-block:clamp(32px,4vw,56px)}
+.reveal,.stagger>*{filter:none!important}
+/* home hero: centred, one message, then the product */
+.hero-a{text-align:center;padding-top:clamp(56px,8vw,110px);overflow:hidden}
+.hero-a .wrap{display:flex;flex-direction:column;align-items:center}
+.hero-a .h1{max-width:12em;margin-inline:auto;font-size:clamp(44px,7.4vw,96px);line-height:.98}
+.hero-a .lead{margin:22px auto 0;max-width:34em;font-size:clamp(18px,1.6vw,22px)}
+.hero-a .hero-acts{justify-content:center;margin-top:30px;display:flex;flex-wrap:wrap;gap:12px}
+.hero-a .hero-trust{justify-content:center;margin-top:16px}
+.hero-shot{position:relative;width:min(1040px,calc(100% - 32px));margin:clamp(40px,6vw,72px) auto 0;padding-bottom:clamp(20px,3vw,40px)}
+.hs-browser .browser{box-shadow:0 50px 100px -50px rgba(0,0,0,.45)}
+.hs-browser .bview.shot{max-height:clamp(280px,42vw,520px);overflow:hidden}
+.hs-phone{position:absolute;bottom:0;width:clamp(110px,17vw,210px);height:auto;border-radius:clamp(18px,2.6vw,32px);border:clamp(4px,.6vw,7px) solid #0b0d0c;box-shadow:0 40px 70px -30px rgba(0,0,0,.6)}
+.hs-l{left:-2%;transform:rotate(-4deg)}.hs-r{right:-2%;transform:rotate(4deg)}
+/* home project tiles */
+.htiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,20px)}
+.htile{display:flex;flex-direction:column;border-radius:28px;overflow:hidden;background:var(--fill);color:inherit;text-decoration:none;transition:transform .4s var(--ease)}
+.htile:hover{transform:translateY(-4px)}
+.ht-img{height:clamp(240px,30vw,400px);overflow:hidden;display:flex;justify-content:center;align-items:flex-end}
+.ht-img img{width:100%;height:100%;object-fit:cover;object-position:top}
+.ht-img .t-phone{width:auto;height:92%;object-fit:contain;border-radius:28px 28px 0 0;border:7px solid #0b0d0c;border-bottom:0}
+.ht-sl .ht-img{background:linear-gradient(180deg,#0E7A48,#12A05F)}
+.ht-ol .ht-img{background:linear-gradient(180deg,#1C2532,#334155)}
+.ht-txt{padding:22px 26px 26px;display:flex;flex-direction:column;gap:6px}
+.ht-txt h3{font-size:clamp(22px,2.2vw,28px);letter-spacing:-.04em}
+.ht-txt p{color:var(--ink-2);font-size:15.5px}
+.ht-txt .link{margin-top:6px}
+.more-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.more-row a{padding:12px 20px;border-radius:999px;background:var(--fill);color:var(--ink);font-weight:650;font-size:15px;text-decoration:none}
+.more-row a:hover{color:var(--blue)}
+@media (max-width:760px){.htiles{grid-template-columns:minmax(0,1fr)}.hs-phone{width:26vw}.hs-l{left:-4%}.hs-r{right:-4%}}
