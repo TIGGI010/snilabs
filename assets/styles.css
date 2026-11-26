@@ -1875,7 +1875,7 @@ html[data-festive="on"] .logo::before{content:"";position:absolute;left:-9px;top
 html[data-festive="on"] .h1 .dot,html[data-festive="on"] .ph-title .dot{color:var(--pine)}
 html[data-festive="on"] .status i{background:var(--pine)}
 html[data-festive="on"] .band{background:radial-gradient(70% 90% at 90% 0%,rgba(200,16,46,.35),transparent 60%),var(--panel)!important}
-.snow{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:55}
+.snow{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:55;opacity:.8}
 .fest-btn[aria-pressed="true"]{color:var(--blue)}
 @media (prefers-reduced-motion:reduce){.snow{display:none}}
 
@@ -1989,3 +1989,4 @@ html.vt-nav .enter{animation:none}
 @keyframes line-in{from{opacity:0;translate:-14px 0;background:color-mix(in srgb,var(--blue) 14%,transparent)}}
 @media (prefers-reduced-motion:reduce){.est-out.bump,.is-new,.gallery[open]{animation:none}}
 .wa-fab{display:none!important}
+.fest-btn svg{stroke-width:1.6}
