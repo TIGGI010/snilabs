@@ -1880,3 +1880,34 @@ html[data-festive="on"] .band{background:radial-gradient(70% 90% at 90% 0%,rgba(
 @media (prefers-reduced-motion:reduce){.snow{display:none}}
 
 .hero-a .sa-badge{justify-content:center;margin-bottom:18px}
+/* ---------- app pages in the new UI (round 17): centred, one message, the product big ---------- */
+.proj-hero{text-align:center;padding-top:clamp(48px,6vw,88px);padding-bottom:0;overflow:hidden;
+  background:radial-gradient(80% 60% at 50% 0%,color-mix(in srgb,var(--ph2) 55%,transparent),transparent 70%),var(--ph)}
+.proj-hero .proj-grid{display:flex!important;flex-direction:column;align-items:center;gap:0}
+.proj-hero .proj-grid>div:first-child{display:flex;flex-direction:column;align-items:center;max-width:780px}
+.proj-hero .proj-top{justify-content:center;margin-bottom:22px}
+.proj-hero .proj-icon svg{width:96px;height:96px;border-radius:24px}
+.proj-hero .ph-title{font-size:clamp(56px,9.5vw,128px);line-height:.95}
+.proj-hero .lead{margin:20px auto 0;max-width:32em;font-size:clamp(18px,1.6vw,22px)}
+.proj-hero .ctas{justify-content:center;margin-top:28px}
+.proj-hero .stores,.proj-hero .proj-status{display:flex;justify-content:center}
+.proj-hero .proj-visual{margin-top:clamp(40px,6vw,64px);height:clamp(380px,46vw,560px);overflow:hidden;display:flex;justify-content:center;align-items:flex-start}
+.proj-hero .proj-phone{transform:none!important;width:clamp(260px,30vw,380px)!important;padding:11px;border-radius:52px;box-shadow:0 0 0 1px rgba(255,255,255,.2),0 60px 120px -40px rgba(0,0,0,.7)}
+.proj-hero .proj-phone img{border-radius:42px}
+.proj-hero .proj-badge{transform:none;width:clamp(180px,22vw,260px)}
+.proj-hero .route-under{display:none}
+.proj-hero>.wrap:last-child{background:transparent}
+.proj-facts{margin:0 auto!important;padding:clamp(28px,4vw,44px) 0 clamp(36px,5vw,56px);border:0!important;border-top:1px solid rgba(255,255,255,.18)!important;border-radius:0!important;background:none!important;gap:clamp(16px,3vw,40px)!important}
+.proj-facts div{background:none!important;padding:0!important;align-items:center;text-align:center}
+.proj-facts b{font-size:clamp(34px,4vw,52px)}
+/* the rest of an app page: centred statements, big screens, soft cards */
+.proj .section .wrap.pt{display:block;max-width:900px;text-align:center}
+.proj .section .wrap.pt .lead{margin:18px auto 0;max-width:38em;font-size:clamp(18px,1.7vw,22px)}
+.proj .section .wrap.pt .checks,.proj .section .wrap.pt .deep,.proj .section .wrap.pt .steps{text-align:left;margin-top:clamp(28px,4vw,44px)}
+.proj .section .wrap.pt .next-h{text-align:left}
+.proj .head{justify-content:center;text-align:center}
+.proj .head .lead{margin-inline:auto}
+.proj .shots{grid-auto-columns:minmax(230px,280px);justify-content:safe center}
+.proj .shot figcaption{text-align:center;margin-top:12px}
+.proj .maps{gap:clamp(12px,1.6vw,20px)}
+@media (max-width:760px){.proj .shots{justify-content:start;grid-auto-columns:70%}.proj-hero .proj-visual{height:420px}}
