@@ -1836,3 +1836,45 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .more-row a{padding:12px 20px;border-radius:999px;background:var(--fill);color:var(--ink);font-weight:650;font-size:15px;text-decoration:none}
 .more-row a:hover{color:var(--blue)}
 @media (max-width:760px){.htiles{grid-template-columns:minmax(0,1fr)}.hs-phone{width:26vw}.hs-l{left:-4%}.hs-r{right:-4%}}
+
+/* ---------- Christmas theme (round 16): a switch of its own, on top of light or dark ---------- */
+:root[data-festive="on"]{
+  --bg:#FFFCF8;--bg-2:#FBF5EE;--bg-3:#F3EAE0;--card:#FFFFFF;--fill:#F8F1EA;
+  --line:#EFE4D8;--line-2:#E2D3C3;
+  --blue:#C8102E;--btn:#C8102E;--btn-ink:#FFFFFF;--pine:#0F6B44;
+  --dot:rgba(200,16,46,.14);--snow:#B9C9DD;
+  --panel:#0C3A2A;--panel-ink:#FFF8F0;--panel-ink-2:#BFD6CA;--panel-line:rgba(255,255,255,0);
+}
+@media (prefers-color-scheme:dark){
+  :root[data-festive="on"]:not([data-theme="light"]){
+    --bg:#06120D;--bg-2:#0A1A13;--bg-3:#11251C;--card:#0A1A13;--fill:#0E2119;
+    --ink:#F7F3EE;--ink-2:#B8C4BD;--ink-3:#8B988F;
+    --line:#16291F;--line-2:#22392D;
+    --blue:#FF5D6A;--btn:#D42A3A;--btn-ink:#FFFFFF;--pine:#3DDC8A;
+    --dot:rgba(255,255,255,.1);--snow:#FFFFFF;
+    --panel:#0C2A1F;--panel-ink:#F7F3EE;--panel-ink-2:#B8C4BD;--panel-line:#16291F;
+  }
+}
+:root[data-festive="on"][data-theme="dark"]{
+  --bg:#06120D;--bg-2:#0A1A13;--bg-3:#11251C;--card:#0A1A13;--fill:#0E2119;
+  --ink:#F7F3EE;--ink-2:#B8C4BD;--ink-3:#8B988F;
+  --line:#16291F;--line-2:#22392D;
+  --blue:#FF5D6A;--btn:#D42A3A;--btn-ink:#FFFFFF;--pine:#3DDC8A;
+  --dot:rgba(255,255,255,.1);--snow:#FFFFFF;
+  --panel:#0C2A1F;--panel-ink:#F7F3EE;--panel-ink-2:#B8C4BD;--panel-line:#16291F;
+}
+html[data-festive="on"] body{background:var(--bg)}
+/* candy-cane line under the header */
+html[data-festive="on"] .site-header::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;pointer-events:none;
+  background:repeating-linear-gradient(135deg,#C8102E 0 12px,#FFF8F0 12px 24px,#0F6B44 24px 36px,#FFF8F0 36px 48px)}
+/* a Santa hat on the logo mark */
+html[data-festive="on"] .logo{position:relative}
+html[data-festive="on"] .logo::before{content:"";position:absolute;left:-9px;top:-13px;width:30px;height:24px;transform:rotate(-18deg);pointer-events:none;z-index:2;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 24'%3E%3Cpath d='M3 19 C6 8 14 2 22 4 C26 5 27 9 26 12 L20 9 C17 12 15 16 14 19 Z' fill='%23C8102E'/%3E%3Crect x='1' y='17' width='17' height='5.5' rx='2.75' fill='%23FFFFFF' stroke='%23E8E1D8' stroke-width='.6'/%3E%3Ccircle cx='26.3' cy='12.6' r='3' fill='%23FFFFFF' stroke='%23E8E1D8' stroke-width='.6'/%3E%3C/svg%3E") no-repeat center/contain}
+/* festive accents */
+html[data-festive="on"] .h1 .dot,html[data-festive="on"] .ph-title .dot{color:var(--pine)}
+html[data-festive="on"] .status i{background:var(--pine)}
+html[data-festive="on"] .band{background:radial-gradient(70% 90% at 90% 0%,rgba(200,16,46,.35),transparent 60%),var(--panel)!important}
+.snow{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:55}
+.fest-btn[aria-pressed="true"]{color:var(--blue)}
+@media (prefers-reduced-motion:reduce){.snow{display:none}}

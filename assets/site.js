@@ -61,6 +61,48 @@
   };
   $$('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => toggleTheme(b)));
 
+  /* ---------- Christmas theme: its own switch, works with light and dark, snow on top ---------- */
+  const festive = (() => {
+    let cv, ctx, raf, flakes = [], w = 0, h = 0, dpr = 1;
+    const isOn = () => root.getAttribute('data-festive') === 'on';
+    const resize = () => { if (!cv) return; dpr = Math.min(2, devicePixelRatio || 1); w = innerWidth; h = innerHeight; cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    const make = () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 2.2 + .7, s: Math.random() * .5 + .25, d: Math.random() * 6.28, o: Math.random() * .5 + .4 });
+    const loop = () => {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = getComputedStyle(root).getPropertyValue('--snow').trim() || '#fff';
+      for (const f of flakes) {
+        f.d += .01; f.y += f.s; f.x += Math.sin(f.d) * .35;
+        if (f.y > h + 4) { f.y = -4; f.x = Math.random() * w; }
+        ctx.globalAlpha = f.o; ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fill();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    const start = () => {
+      if (cv || reduced) return;
+      cv = document.createElement('canvas'); cv.className = 'snow'; cv.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(cv); ctx = cv.getContext('2d'); resize();
+      flakes = Array.from({ length: Math.min(70, Math.round(innerWidth / 18)) }, make);
+      addEventListener('resize', resize); loop();
+    };
+    const stop = () => { cancelAnimationFrame(raf); if (cv) cv.remove(); cv = null; removeEventListener('resize', resize); };
+    document.addEventListener('visibilitychange', () => { if (!cv) return; if (document.hidden) cancelAnimationFrame(raf); else loop(); });
+    const sync = () => { $$('[data-festive-toggle]').forEach(b => b.setAttribute('aria-pressed', isOn())); isOn() ? start() : stop(); };
+    const toggle = origin => {
+      const apply = () => {
+        if (isOn()) root.removeAttribute('data-festive'); else root.setAttribute('data-festive', 'on');
+        try { localStorage.setItem('startline-festive', isOn() ? 'on' : 'off'); } catch (e) {}
+        sync();
+      };
+      if (!document.startViewTransition || reduced) { apply(); return; }
+      const r = origin.getBoundingClientRect();
+      root.style.setProperty('--vx', (r.left + r.width / 2) + 'px'); root.style.setProperty('--vy', (r.top + r.height / 2) + 'px');
+      root.classList.add('vt-theme');
+      document.startViewTransition(apply).finished.finally(() => root.classList.remove('vt-theme'));
+    };
+    $$('[data-festive-toggle]').forEach(b => b.addEventListener('click', () => toggle(b)));
+    sync();
+  })();
+
   /* ---------- toast + copy ---------- */
   const toast = (() => {
     let el, t;
