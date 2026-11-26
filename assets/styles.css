@@ -1911,3 +1911,22 @@ html[data-festive="on"] .band{background:radial-gradient(70% 90% at 90% 0%,rgba(
 .proj .shot figcaption{text-align:center;margin-top:12px}
 .proj .maps{gap:clamp(12px,1.6vw,20px)}
 @media (max-width:760px){.proj .shots{justify-content:start;grid-auto-columns:70%}.proj-hero .proj-visual{height:420px}}
+
+/* ---------- transitions, round 18 ---------- */
+/* going back folds the page into the card it opened from */
+html:active-view-transition-type(collapse)::view-transition-old(page){z-index:2;animation:vt-collapse .52s cubic-bezier(.4,0,.2,1) both}
+html:active-view-transition-type(collapse)::view-transition-new(page){animation:vt-uncover .52s cubic-bezier(.2,.75,.15,1) both}
+@keyframes vt-collapse{to{clip-path:inset(var(--ex-t,30%) var(--ex-r,30%) var(--ex-b,30%) var(--ex-l,30%) round 28px);opacity:.2}}
+@keyframes vt-uncover{from{opacity:.4;transform:scale(.96);filter:blur(4px)}}
+/* the page title glides from where it was to where the new one sits */
+main h1{view-transition-name:page-title}
+html.vt-theme main h1{view-transition-name:none}
+::view-transition-group(page-title){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.75,.15,1);z-index:3}
+::view-transition-old(page-title){animation:vt-fade-out .22s ease both}
+::view-transition-new(page-title){animation:vt-fade .4s ease .12s both}
+/* the menu's active dot slides to the new page */
+.nav a[aria-current="page"]::after{display:none}
+.nav-dot{position:absolute;left:50%;bottom:2px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--blue);view-transition-name:nav-dot}
+::view-transition-group(nav-dot){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,1.4,.4,1)}
+/* arriving by a transition: one motion, not two */
+html.vt-nav .enter{animation:none}
