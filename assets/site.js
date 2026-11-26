@@ -61,6 +61,21 @@
   };
   $$('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => toggleTheme(b)));
 
+  /* ---------- project gallery: swipe between projects like photos ---------- */
+  const gal = $('#gallery');
+  if (gal) {
+    const track = $('.gal-track', gal), n = $('.gal-n', gal), slides = $$('.gal-s', gal);
+    const idx = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = i => track.scrollTo({ left: Math.max(0, Math.min(slides.length - 1, i)) * track.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+    track.addEventListener('scroll', () => { n.textContent = (idx() + 1) + ' / ' + slides.length; }, { passive: true });
+    $$('[data-gallery-open]').forEach(b => b.addEventListener('click', () => { gal.showModal(); track.scrollLeft = 0; track.focus(); }));
+    $('[data-gallery-close]', gal).addEventListener('click', () => gal.close());
+    $('.gal-nav.prev', gal).addEventListener('click', () => go(idx() - 1));
+    $('.gal-nav.next', gal).addEventListener('click', () => go(idx() + 1));
+    gal.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); go(idx() + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(idx() - 1); } });
+    gal.addEventListener('click', e => { if (e.target === gal) gal.close(); });
+  }
+
   /* ---------- Christmas theme: its own switch, works with light and dark, snow on top ---------- */
   const festive = (() => {
     let cv, ctx, raf, flakes = [], w = 0, h = 0, dpr = 1;
@@ -327,17 +342,21 @@
         state.set(el, k < 1 ? cur : { lo, hi });
       };
       state.set(el, Object.assign({}, from, { raf: requestAnimationFrame(tick) }));
+      const card = el.closest('.est-card,.est-out,.est-sum,aside') || el; card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump');
     };
   })();
   const fillLines = (ul, lines) => {
+    const had = ul._keys || new Set([...ul.querySelectorAll('li > span:first-child')].map(s => s.textContent)), now = new Set();
     ul.textContent = '';
     lines.forEach(([k, v]) => {
       const li = document.createElement('li');
+      now.add(k); const t = performance.now(), seen = ul._t || (ul._t = {}); if (!had.has(k)) seen[k] = t; if (seen[k] && t - seen[k] < 500) li.className = 'is-new';
       const a = document.createElement('span'); a.textContent = k;
       const b = document.createElement('b'); b.textContent = v;
       li.append(a, b);
       ul.appendChild(li);
     });
+    ul._keys = now;
   };
   const readHash = key => {
     try {

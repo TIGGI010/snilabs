@@ -1930,3 +1930,62 @@ html.vt-theme main h1{view-transition-name:none}
 ::view-transition-group(nav-dot){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,1.4,.4,1)}
 /* arriving by a transition: one motion, not two */
 html.vt-nav .enter{animation:none}
+/* ---------- round 19: tab bar, gallery, scroll-linked visuals, live estimate ---------- */
+/* phone tab bar: the highlight slides to the page you are on */
+.mbar.tabbar{gap:0;padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));view-transition-name:tabbar}
+::view-transition-old(tabbar),::view-transition-new(tabbar){animation:none}
+.tb{position:relative;isolation:isolate;flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 5px;border-radius:14px;color:var(--ink-3);font-size:11px;font-weight:700;letter-spacing:.01em;text-decoration:none}
+.tb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tb.on{color:var(--blue)}
+.tb-pill{position:absolute;inset:0 8%;z-index:-1;border-radius:14px;background:color-mix(in srgb,var(--blue) 13%,transparent);view-transition-name:tab-pill}
+::view-transition-group(tab-pill){animation-duration:.45s;animation-timing-function:cubic-bezier(.3,1.3,.4,1)}
+.tb-wa{color:#1DA851}
+/* project gallery */
+.gallery{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#050506;color:#fff;overflow:hidden}
+.gallery::backdrop{background:#000}
+.gallery[open]{animation:gal-in .45s cubic-bezier(.2,.75,.15,1)}
+@keyframes gal-in{from{opacity:0;transform:scale(.96)}}
+.gal-bar{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
+.gal-n{font-size:14px;font-weight:700;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
+.gallery .ibtn{color:#fff;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.08)}
+.gal-track{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;outline:none}
+.gal-track::-webkit-scrollbar{display:none}
+.gal-s{flex:0 0 100%;height:100%;margin:0;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:70px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+.gal-img{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.gal-img img{max-width:min(1000px,100%);max-height:100%;object-fit:contain;border-radius:18px;box-shadow:0 40px 90px -30px rgba(0,0,0,.8)}
+.gal-ph .gal-img img{border-radius:36px;border:8px solid #16171A}
+.gal-web .gal-img img{object-fit:cover;object-position:top;aspect-ratio:16/10;width:min(1000px,100%);height:auto}
+.gal-s figcaption{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.gal-s figcaption b{font-size:clamp(22px,2.6vw,32px);letter-spacing:-.04em}
+.gal-s figcaption span{color:rgba(255,255,255,.7);font-size:15px}
+.gal-s .link{color:#fff;margin-top:6px}
+.gal-nav{position:absolute;top:50%;z-index:2;width:48px;height:48px;margin-top:-24px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;cursor:pointer}
+.gal-nav svg{width:22px;height:22px}
+.gal-nav.prev{left:max(16px,env(safe-area-inset-left,0px))}.gal-nav.next{right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:760px){.gal-nav{display:none}}
+/* scroll-linked visuals */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .hero-shot .hs-browser{animation:hs-b linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+    .hero-shot .hs-l{animation:hs-l linear both;animation-timeline:view();animation-range:entry 0% cover 55%}
+    .hero-shot .hs-r{animation:hs-r linear both;animation-timeline:view();animation-range:entry 0% cover 55%}
+    @keyframes hs-b{from{scale:.92;opacity:.6}to{scale:1;opacity:1}}
+    @keyframes hs-l{from{translate:-40px 90px;rotate:-8deg}to{translate:0 0;rotate:0deg}}
+    @keyframes hs-r{from{translate:40px 90px;rotate:8deg}to{translate:0 0;rotate:0deg}}
+    .ht-img img:not(.t-phone){animation:ht-par linear both;animation-timeline:view();animation-range:cover}
+    @keyframes ht-par{from{scale:1.1;translate:0 -3%}to{scale:1.1;translate:0 3%}}
+    .ht-img .t-phone{animation:ht-rise linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+    @keyframes ht-rise{from{translate:0 60px}to{translate:0 0}}
+    .proj-hero .proj-phone{animation:pp-rise linear both;animation-timeline:view();animation-range:entry 0% exit 40%}
+    @keyframes pp-rise{from{translate:0 40px}to{translate:0 -60px}}
+    .proj .shot{animation:shot-in linear both;animation-timeline:view(inline);animation-range:entry 0% cover 30%}
+    @keyframes shot-in{from{scale:.9;opacity:.4}to{scale:1;opacity:1}}
+  }
+}
+/* the estimate reacts: the total card pulses, new lines slide in */
+.est-out.bump{animation:est-bump .5s cubic-bezier(.3,1.4,.4,1)}
+@keyframes est-bump{40%{scale:1.025}}
+.is-new{animation:line-in .45s cubic-bezier(.2,.75,.15,1) both}
+@keyframes line-in{from{opacity:0;translate:-14px 0;background:color-mix(in srgb,var(--blue) 14%,transparent)}}
+@media (prefers-reduced-motion:reduce){.est-out.bump,.is-new,.gallery[open]{animation:none}}
+.wa-fab{display:none!important}
