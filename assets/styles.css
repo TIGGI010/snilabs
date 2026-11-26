@@ -1682,3 +1682,34 @@ body:has(input:focus,textarea:focus,select:focus) .wa-fab{opacity:0;pointer-even
 .eng .next-h{margin-top:clamp(28px,3.5vw,44px)}
 .eng-early{margin-top:clamp(24px,3vw,36px)}
 .eng .proj-hero{padding-bottom:clamp(36px,5vw,64px)}
+/* work page: at a glance, in motion; TigzDoesTri case study gallery (round 12) */
+.glance-sec{padding-top:0}
+.glance{display:grid;gap:clamp(18px,2.4vw,26px);padding:clamp(20px,3vw,32px);border:1px solid var(--line);border-radius:28px;background:var(--bg-2)}
+.gl-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.gl-stats div{display:flex;flex-direction:column;gap:4px}
+.gl-stats b{font-size:clamp(34px,5vw,56px);font-weight:800;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+.gl-stats span{font-size:14.5px;color:var(--ink-2);font-weight:600}
+.gl-icons{display:flex;flex-wrap:wrap;gap:12px}
+.gl-icons a{width:clamp(52px,6vw,64px);aspect-ratio:1;border-radius:16px;overflow:hidden;box-shadow:0 10px 22px -14px rgba(0,0,0,.45);transition:transform .2s}
+.gl-icons a:hover{transform:translateY(-3px)}
+.gl-icons svg{width:100%;height:100%;display:block}
+.gl-cred{display:flex;align-items:center;gap:12px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink-2);font-size:15px;line-height:1.45;text-decoration:none}
+.gl-cred b{color:var(--ink)}.gl-cred>svg:first-child{flex:0 0 22px;color:var(--blue)}.gl-cred:hover b{color:var(--blue)}
+.gl-cred>svg:last-child{flex:0 0 18px;width:18px;height:18px;margin-left:auto}.gl-cred>svg:first-child{width:22px;height:22px}
+.motion{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,1.6vw,20px)}
+.mo-card{margin:0;display:flex;flex-direction:column;gap:12px}
+.mo-card video{width:100%;height:auto;aspect-ratio:9/16;border-radius:22px;background:#000;border:1px solid var(--line);display:block}
+.mo-card figcaption{display:flex;flex-direction:column;gap:3px;font-size:14.5px;color:var(--ink-2)}
+.mo-card figcaption b{font-size:17px;color:var(--ink)}
+.mo-card .link{margin-top:4px}
+.tg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,20px)}
+.tg-grid .bview.shot{max-height:520px;overflow:hidden}
+.tg-phones{margin-top:clamp(16px,2.4vw,28px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.6vw,20px)}
+.tg-ph{margin:0;display:flex;flex-direction:column;gap:10px;align-items:center}
+.tg-ph img{width:100%;height:auto;border-radius:clamp(18px,2.4vw,30px);border:6px solid #0b0d0c;box-shadow:0 24px 50px -26px rgba(0,0,0,.6);display:block}
+.tg-ph figcaption{font-size:14px;font-weight:700;color:var(--ink-2)}
+.tg-brand{margin:clamp(16px,2.4vw,28px) 0 0}
+.tg-brand img{width:100%;height:auto;border-radius:24px;display:block;border:1px solid var(--line)}
+.tg-brand figcaption{margin-top:10px;font-size:14.5px;color:var(--ink-3)}
+@media (max-width:820px){.motion{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:64%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}.mo-card{scroll-snap-align:start}
+  .gl-stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:18px}.tg-grid{grid-template-columns:minmax(0,1fr)}.tg-phones{grid-template-columns:repeat(2,minmax(0,1fr))}}
